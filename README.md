@@ -1,7 +1,7 @@
 # DTITK_template-diffvalues
 (C) Chris Vriend - Amsterdam UMC - feb ' 23
 
-c.vriend<at>amsterdamumc-dot-nl
+c.vriend|amsterdamumc-dot-nl
 
  DTITK template creation and extract diffusion measures from b1000 shell and NODDI measures
 
