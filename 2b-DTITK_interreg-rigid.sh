@@ -15,9 +15,10 @@ module load dtitk/2.3.1
 module load fsl/6.0.5.1
 . ${DTITK_ROOT}/scripts/dtitk_common.sh
 
+
 # Sets up variables for folder with tensor images from all subjects and recommended template from DTI-TK
 headdir=${1}
-workdir=${headdir}/DTITK_interreg
+workdir=${headdir}/interreg
 scriptdir=${headdir}/scripts
 template=${2} # ixi template
 subjects=${3} # inter_subjects.txt

@@ -10,10 +10,11 @@ module load dtitk/2.3.1
 module load fsl/6.0.5.1
 
 . ${DTITK_ROOT}/scripts/dtitk_common.sh
-scriptdir=/home/anw/cvriend/my-scratch/DTITK_TIPICCO/scripts
 
 # Sets up variables for folder with tensor images from all subjects
-workdir=${1}
+headdir=${1}
+workdir=${headdir}/interreg
+scriptdir=${headdir}/scripts
 template=${2} # mean_affine${Niter}.nii.gz
 mask=${3}     # mask.nii.gz
 subjects=${4} # inter_subjects_aff.txt
