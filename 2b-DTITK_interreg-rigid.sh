@@ -15,10 +15,10 @@ module load dtitk/2.3.1
 module load fsl/6.0.5.1
 . ${DTITK_ROOT}/scripts/dtitk_common.sh
 
-scriptdir=/home/anw/cvriend/my-scratch/DTITK_TIPICCO/scripts
-
 # Sets up variables for folder with tensor images from all subjects and recommended template from DTI-TK
-workdir=${1}
+headdir=${1}
+workdir=${headdir}/DTITK_interreg
+scriptdir=${headdir}/scripts
 template=${2} # ixi template
 subjects=${3} # inter_subjects.txt
 simul=${4}

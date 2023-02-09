@@ -14,10 +14,10 @@
 
 ##disabled##SBATCH --array 1-11%11
 
-workdir=${1}
+headdir=${1}
 
-cd ${workdir}
-QCdir=${workdir}/QC
+cd ${headdir}
+QCdir=${headdir}/QC
 mkdir -p ${QCdir}
 ls -d sub-*/ | sed 's:/.*::' >subjects.txt
 subj=$(sed "${SLURM_ARRAY_TASK_ID}q;d" subjects.txt)
@@ -34,7 +34,7 @@ ixitemplate=/data/anw/anw-gold/NP/doorgeefluik/ixi_aging_template_v3.0/template
 
 # Sets up variables for folder with tensor images from all subjects and recommended template from DTI-TK
 
-scriptdir=${workdir}/scripts
+scriptdir=${headdir}/scripts
 bshell=1000
 Niter=5
 export DTITK_USE_QSUB=0
@@ -47,13 +47,13 @@ echo "-------"
 # DWI split
 #########################################
 
-cd ${workdir}/${subj}
+cd ${headdir}/${subj}
 
 for time in $(ls -d T?); do
 
-    if [ ! -f ${workdir}/${subj}/DWI_${subj}_${time}_b0_b1000_dtitk.nii.gz ]; then
+    if [ ! -f ${headdir}/${subj}/DWI_${subj}_${time}_b0_b1000_dtitk.nii.gz ]; then
 
-        cd ${workdir}/${subj}/${time}
+        cd ${headdir}/${subj}/${time}
 
         echo "...${time}"
         for d in vol_b0 b0_b1000; do
@@ -66,17 +66,17 @@ for time in $(ls -d T?); do
             echo "create brain mask"
             fslroi data dwinodif 0 2
             fslmaths dwinodif -Tmean nodif
-            ${synthstrip} -i ${workdir}/${subj}/${time}/nodif.nii.gz \
-                -m ${workdir}/${subj}/${time}/nodif_brainmask.nii.gz
+            ${synthstrip} -i ${headdir}/${subj}/${time}/nodif.nii.gz \
+                -m ${headdir}/${subj}/${time}/nodif_brainmask.nii.gz
 
             # synthstrip does something weird to the header that leads to
             # warning messages in the next step. Therefore we clone the header
             # from the input image
-            fslcpgeom ${workdir}/${subj}/${time}/nodif.nii.gz \
-                ${workdir}/${subj}/${time}/nodif_brainmask.nii.gz
+            fslcpgeom ${headdir}/${subj}/${time}/nodif.nii.gz \
+                ${headdir}/${subj}/${time}/nodif_brainmask.nii.gz
 
         fi
-        slicer nodif nodif_brainmask -a ${workdir}/QC/${subj}_${time}_maskQC.png
+        slicer nodif nodif_brainmask -a ${headdir}/QC/${subj}_${time}_maskQC.png
 
         echo "split DWI nifti"
         fslsplit data.nii.gz
@@ -126,15 +126,15 @@ for time in $(ls -d T?); do
             #########################################
             # Make dtifit’s dti_V{123} and dti_L{123} compatible with DTI-TK
             #########################################
-            cd ${workdir}/${subj}/${time}/b0_b${l}
+            cd ${headdir}/${subj}/${time}/b0_b${l}
 
-            if [ ! -f ${workdir}/${subj}/DWI_${subj}_${time}_b0_b${l}_dtitk.nii.gz ]; then
+            if [ ! -f ${headdir}/${subj}/DWI_${subj}_${time}_b0_b${l}_dtitk.nii.gz ]; then
 
                 fsl_to_dtitk DWI_${subj}_${time}_b0_b${l}
-                mv DWI_${subj}_${time}_b0_b${l}_dtitk.nii.gz ${workdir}/${subj}
+                mv DWI_${subj}_${time}_b0_b${l}_dtitk.nii.gz ${headdir}/${subj}
                 rm -f *nonSPD.nii.gz *norm.nii.gz
             fi
-            rm ${workdir}/${subj}/${time}/vol*.nii.gz
+            rm ${headdir}/${subj}/${time}/vol*.nii.gz
         done
 
     fi
@@ -153,7 +153,7 @@ echo
 echo "continue with intra-subject registration"
 echo
 
-cd ${workdir}/${subj}
+cd ${headdir}/${subj}
 
 ls -1 *dtitk.nii.gz > ${subj}.txt
 
@@ -215,7 +215,7 @@ if test $(cat ${subj}.txt | wc -l) -gt 1; then
     # Creates non-linear transform from
     #individual timepoint to subject-specific template
     #########################################
-    cd ${workdir}/${subj}
+    cd ${headdir}/${subj}
     for session in $(ls -d T?); do
         if [ ! -f DWI_${subj}_${session}_combined.df.nii.gz ]; then
             echo "Making non-linear transform for timepoint ${session}"
@@ -286,7 +286,7 @@ fi
 
 	# 	rm ${subj}_intrareg_${session}.nii.gz
 	# done
-	cd ${workdir}
+	cd ${headdir}
 
 else
 

@@ -23,12 +23,12 @@ EOF
 module load dtitk/2.3.1
 module load fsl/6.0.5.1
 
-workdir=${1}
+headdir=${1}
 tractfile=${2}
-diffdir=${workdir}/diffmaps
-tractdir=${workdir}/tracts
-scriptdir=${workdir}/scripts
-outputdir=${workdir}/diffvalues
+diffdir=${headdir}/diffmaps
+tractdir=${headdir}/tracts
+scriptdir=${headdir}/scripts
+outputdir=${headdir}/diffvalues
 simul=8
 
 cd ${tractdir}

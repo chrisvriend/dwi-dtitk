@@ -10,8 +10,8 @@ Usage() {
     (C) C.Vriend - 2/3/2023 - 03-DTITK_warp2template.sh
 	warp dtitk image from each timepoint in subject-space to templatespace and reslice to 1mm3 voxels.
 
-    Usage: ./03-DTITK_warp2template.sh workdir
-    Obligatory: workdir = full path to working (head) directory where all folders are situated, 
+    Usage: ./03-DTITK_warp2template.sh headdir
+    Obligatory: headdir = full path to working (head) directory where all folders are situated, 
 	including the subject folders (see wrapper script)
     
 EOF
@@ -25,11 +25,11 @@ module load fsl/6.0.5.1
 
 cleanup=0
 # warp native DTITK scans to group template
-workdir=${1}
+headdir=${1}
 # headdir
 
-warpdir=${workdir}/warps
-regdir=${workdir}/interreg
+warpdir=${headdir}/warps
+regdir=${headdir}/interreg
 mkdir -p ${warpdir}
 
 cd ${regdir}
@@ -49,12 +49,12 @@ if [ -f long_subjects.txt ]; then
 				-out ${warpdir}/${subj}_inter_subject_combined.df.nii.gz
 		fi
 
-		cd ${workdir}/${subj}
+		cd ${headdir}/${subj}
 		for session in $(ls -d T?); do
 			if [ ! -f ${warpdir}/${subj}_${session}_native2template_combined.df.nii.gz ]; then
 
 				# Combine warp fields from T0 intra-subject space -> inter-subject template space
-				dfComposition -df1 ${workdir}/${subj}/DWI_${subj}_${session}_combined.df.nii.gz \
+				dfComposition -df1 ${headdir}/${subj}/DWI_${subj}_${session}_combined.df.nii.gz \
 					-df2 ${warpdir}/${subj}_inter_subject_combined.df.nii.gz \
 					-out ${warpdir}/${subj}_${session}_native2template_combined.df.nii.gz
 			fi
@@ -68,7 +68,7 @@ if [ -f long_subjects.txt ]; then
 
 				# Warp image for T0 from native -> inter-subjecte space
 				deformationSymTensor3DVolume \
-					-in ${workdir}/${subj}/DWI_${subj}_${session}_b0_b1000_dtitk.nii.gz \
+					-in ${headdir}/${subj}/DWI_${subj}_${session}_b0_b1000_dtitk.nii.gz \
 					-trans ${warpdir}/${subj}_${session}_native2template_combined.df.nii.gz \
 					-target ${regdir}/mean_diffeomorphic_initial6.nii.gz \
 					-out ${warpdir}/${subj}_${session}_2templatespace.dtitk.nii.gz -vsize 1 1 1
@@ -152,6 +152,6 @@ fi
 
 if test ${cleanup} -eq 1; then
 	# clean up
-	cd ${workdir}/interreg
+	cd ${headdir}/interreg
 	rm *.aff *diffeo.df.nii.gz *_diffeo.nii.gz
 fi

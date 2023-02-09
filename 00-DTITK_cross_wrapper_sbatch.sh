@@ -105,16 +105,16 @@ done
 ${scriptdir}/2a-DTITK_cross_prepinterreg.sh ${headdir}
 
 # perform rigid/affine inter-subject registration to make initial template
-${scriptdir}/2b-DTITK_interreg-rigid.sh ${headdir}/interreg ${ixitemplate} inter_subjects.txt ${simul}
+${scriptdir}/2b-DTITK_interreg-rigid.sh ${headdir} ${ixitemplate} inter_subjects.txt ${simul}
 
 # perform affine inter-subject registration to make affine template
-${scriptdir}/2c-DTITK_interreg-affine.sh ${headdir}/interreg inter_subjects.txt ${Niter} ${simul}
+${scriptdir}/2c-DTITK_interreg-affine.sh ${headdir} inter_subjects.txt ${Niter} ${simul}
 
 cd ${headdir}/interreg
 ls -1 sub-*_aff.nii.gz >inter_subjects_aff.txt
 mv *.log ./logs
 # perform diffeomorphic inter-subject registration to make diffeo template
-${scriptdir}/2d-DTITK_interreg-diffeo.sh ${headdir}/interreg mean_affine${Niter}.nii.gz mask.nii.gz \
+${scriptdir}/2d-DTITK_interreg-diffeo.sh ${headdir} mean_affine${Niter}.nii.gz mask.nii.gz \
     inter_subjects_aff.txt ${simul}
 
 #############################################################################################

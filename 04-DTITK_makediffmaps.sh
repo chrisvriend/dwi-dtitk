@@ -12,9 +12,9 @@ Usage() {
     and adds those maps to one subject-specific 4D diffusion image with all 7 maps.
     
    
-    Usage: ./04-DTITK_makediffmaps.sh workdir NODDIdir
+    Usage: ./04-DTITK_makediffmaps.sh headdir NODDIdir
     Obligatory: 
-    workdir = full path to working (head) directory where all folders are situated, including the subject folders (see wrapper script)
+    headdir = full path to working (head) directory where all folders are situated, including the subject folders (see wrapper script)
     NODDIdir = full path to directory with the NODDI (Watson) processed files 
     (can be on archive disk; they are temporarily synced to working directory for processing)
     
@@ -29,13 +29,13 @@ module load fsl
 
 echo "extract diffusion measures"
 
-workdir=${1}
+headdir=${1}
 NODDIdir=${2}
-warpdir=${workdir}/warps
-regdir=${workdir}/interreg
-diffdir=${workdir}/diffmaps
+warpdir=${headdir}/warps
+regdir=${headdir}/interreg
+diffdir=${headdir}/diffmaps
 mkdir -p ${diffdir}
-tempdir=${workdir}/NODDItemp
+tempdir=${headdir}/NODDItemp
 mkdir -p ${tempdir}
 
 cd ${warpdir}

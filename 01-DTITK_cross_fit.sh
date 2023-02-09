@@ -14,10 +14,10 @@
 
 ##disabled##SBATCH --array 1-11%11
 
-workdir=${1}
+headdir=${1}
 
-cd ${workdir}
-QCdir=${workdir}/QC
+cd ${headdir}
+QCdir=${headdir}/QC
 mkdir -p ${QCdir}
 ls -d sub-*/ | sed 's:/.*::' >subjects.txt
 subj=$(sed "${SLURM_ARRAY_TASK_ID}q;d" subjects.txt)
@@ -34,7 +34,7 @@ ixitemplate=/data/anw/anw-gold/NP/doorgeefluik/ixi_aging_template_v3.0/template
 
 # Sets up variables for folder with tensor images from all subjects and recommended template from DTI-TK
 
-scriptdir=${workdir}/scripts
+scriptdir=${headdir}/scripts
 bshell=1000
 Niter=5
 export DTITK_USE_QSUB=0
@@ -47,9 +47,9 @@ echo "-------"
 # DWI split
 #########################################
 
-cd ${workdir}/${subj}
+cd ${headdir}/${subj}
 
-if [ ! -f ${workdir}/${subj}/DWI_${subj}_b0_b1000_dtitk.nii.gz ]; then
+if [ ! -f ${headdir}/${subj}/DWI_${subj}_b0_b1000_dtitk.nii.gz ]; then
 
     for d in vol_b0 b0_b1000; do
 
@@ -61,17 +61,17 @@ if [ ! -f ${workdir}/${subj}/DWI_${subj}_b0_b1000_dtitk.nii.gz ]; then
         echo "create brain mask"
         fslroi data dwinodif 0 2
         fslmaths dwinodif -Tmean nodif
-        ${synthstrip} -i ${workdir}/${subj}/nodif.nii.gz \
-            -m ${workdir}/${subj}/nodif_brainmask.nii.gz
+        ${synthstrip} -i ${headdir}/${subj}/nodif.nii.gz \
+            -m ${headdir}/${subj}/nodif_brainmask.nii.gz
 
         # synthstrip does something weird to the header that leads to
         # warning messages in the next step. Therefore we clone the header
         # from the input image
-        fslcpgeom ${workdir}/${subj}/nodif.nii.gz \
-            ${workdir}/${subj}/nodif_brainmask.nii.gz
+        fslcpgeom ${headdir}/${subj}/nodif.nii.gz \
+            ${headdir}/${subj}/nodif_brainmask.nii.gz
 
     fi
-    slicer nodif nodif_brainmask -a ${workdir}/QC/${subj}_maskQC.png
+    slicer nodif nodif_brainmask -a ${headdir}/QC/${subj}_maskQC.png
 
     echo "split DWI nifti"
     fslsplit data.nii.gz
@@ -121,16 +121,16 @@ if [ ! -f ${workdir}/${subj}/DWI_${subj}_b0_b1000_dtitk.nii.gz ]; then
         #########################################
         # Make dtifit’s dti_V{123} and dti_L{123} compatible with DTI-TK
         #########################################
-        cd ${workdir}/${subj}/b0_b${l}
+        cd ${headdir}/${subj}/b0_b${l}
 
-        if [ ! -f ${workdir}/${subj}/DWI_${subj}_b0_b${l}_dtitk.nii.gz ]; then
+        if [ ! -f ${headdir}/${subj}/DWI_${subj}_b0_b${l}_dtitk.nii.gz ]; then
             fsl_to_dtitk DWI_${subj}_b0_b${l}
             rm -f *nonSPD.nii.gz *norm.nii.gz
         mv DWI_${subj}_b0_b${l}_dtitk.nii.gz \
-        ${workdir}/${subj}/DWI_${subj}_b0_b${l}_dtitk.nii.gz
+        ${headdir}/${subj}/DWI_${subj}_b0_b${l}_dtitk.nii.gz
         fi
         
-        rm ${workdir}/${subj}/vol*.nii.gz
+        rm ${headdir}/${subj}/vol*.nii.gz
     done
 
 fi

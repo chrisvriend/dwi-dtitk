@@ -1,10 +1,10 @@
 #!/bin/bash 
 
 echo "prepare inter-subject registration pipeline"
-workdir=${1}
+headdir=${1}
 
-mkdir -p ${workdir}/interreg
-cd ${workdir}/interreg
+mkdir -p ${headdir}/interreg
+cd ${headdir}/interreg
 
 # DTITK can't handle having these files in separate folders.
 # these files therefore need to be combined into one folder

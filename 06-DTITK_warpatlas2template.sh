@@ -44,9 +44,9 @@ threads=16
 module load fsl/6.0.5.1
 module load ANTs/2.4.1
 
-workdir=${1}
-diffdir=${workdir}/diffmaps
-tractdir=${workdir}/tracts
+headdir=${1}
+diffdir=${headdir}/diffmaps
+tractdir=${headdir}/tracts
 mkdir -p ${tractdir}
 labelfile=${2}
 
