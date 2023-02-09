@@ -1,5 +1,30 @@
 #!/bin/bash 
 
+# Written by C. Vriend - AmsUMC Jan 2023
+# c.vriend@amsterdamumc.nl
+
+# usage instructions
+Usage() {
+    cat <<EOF
+
+    (C) C.Vriend - 2/3/2023 - 3c-DTITK_warpqc.sh
+   
+   WIP
+   
+
+    Usage: ./3c-DTITK_warpqc.sh warpdir
+    Obligatory: 
+    warpdit = full path to directory with subject/time-point specific files warped
+    to the group template (with 1x1x1 mm voxels)
+    
+EOF
+    exit 1
+}
+
+[ _$1 = _ ] && Usage
+
+
+
 module load dtitk/2.3.1
 module load fsl/6.0.5.1
 

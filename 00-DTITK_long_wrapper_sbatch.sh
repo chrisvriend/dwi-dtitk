@@ -52,11 +52,33 @@
 #SBATCH --nice=2000
 #SBATCH -o dtitk_wrapper_%a.log
 
+# usage instructions
+Usage() {
+    cat <<EOF
+
+    (C) C.Vriend - 2/3/2023 - 00-DTITK_long_wrapper_sbatch.sh
+	Wrapper script to perform all steps from splitting the eddy-corrected DWI data
+    to b1000 shell, perform intra and inter-person registration.
+    THIS SCRIPT IS FOR SAMPLES WITH LONGITUDINAL DATA (I.E. >2 TIMEPOINTS)
+
+    Usage: ./00-DTITK_long_wrapper_sbatch.sh headdir
+    Obligatory: 
+    headdir = full path to (head) directory where all folders are situated, 
+	including the subject folders and scripts directory (that includes this script)
+    
+EOF
+    exit 1
+}
+
+[ _$1 = _ ] && Usage
+
+
 ###############################
 ## input variables to change ##
 ###############################
 headdir=${1}
 scriptdir=${headdir}/scripts
+# these paths are still hard-coded but may in a future release be changed to user inputs
 ixitemplate=/data/anw/anw-gold/NP/doorgeefluik/ixi_aging_template_v3.0/template/ixi_aging_template.nii.gz
 NODDIarchive=/data/anw/anw-archive/NP/projects/archive_TIPICCO/analysis/DWI/NODDI_output
 
@@ -108,9 +130,10 @@ for subj in ${subjfolders}; do
     ${subj}/*aff.nii.gz \
     ${subj}/mean_df_inv.nii.gz ${subj}/mean_df.nii.gz \
     ${subj}/*mean_initial.nii.gz ${subj}/*mean_affine5.nii.gz
+    
+    cd ${headdir}/${subj}
 
     for time in $(ls -d T?); do
-        cd ${headdir}/${subj}
         find -type d -name "b0_b1000" -exec rm -r {} \;
         find -type d -name "vol_b0" -exec rm -r {} \;
         if [ -f ${headdir}/${subj}/DWI_${subj}_${time}_b0_b1000_dtitk.nii.gz ]; then
@@ -142,7 +165,7 @@ ${scriptdir}/2d-DTITK_interreg-diffeo.sh ${headdir} mean_affine${Niter}.nii.gz m
 # warp images to template
 
 # warp dtitk files from subject space to group template for each timepoint
-${scriptdir}/03-DTITK_warp2template_v2.sh ${headdir}
+${scriptdir}/03-DTITK_warp2template.sh ${headdir}
 
 # make QC figures of warped scans
 ${scriptdir}/3c-DTITK_warpqc.sh ${headdir}/warps

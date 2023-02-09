@@ -3,6 +3,26 @@
 # Written by C. Vriend - AmsUMC Jan 2023
 # c.vriend@amsterdamumc.nl
 
+# usage instructions
+Usage() {
+    cat <<EOF
+
+    (C) C.Vriend - 2/3/2023 - 2c-DTITK_interreg_affine.sh
+   
+   WIP
+   
+
+    Usage: ./2c-DTITK_interreg-affine.sh headdir
+    Obligatory: 
+    headdir = full path to (head) directory where all folders are stored, 
+	including the subject folders and scripts directory (that includes this script)
+    
+EOF
+    exit 1
+}
+
+[ _$4 = _ ] && Usage
+
 
 #########################################
 # Setup relevant software and variables

@@ -12,7 +12,29 @@
 #SBATCH --nice=2000
 #SBATCH -o 1-DTITK_%A_%a.log
 
-##disabled##SBATCH --array 1-11%11
+
+# usage instructions
+Usage() {
+    cat <<EOF
+
+    (C) C.Vriend - 2/3/2023 - 01-DTITK_cross_fit.sh
+    THIS SCRIPT IS FOR SAMPLES WITH cross-SECTIONAL DATA (I.E. 1 TIMEPOINT)
+	Perform DWI split to b1000 and convert to DTITK compatible format for subsequent
+    inter-subject registration 
+
+    Usage: ./01-DTITK_cross_fit.sh headdir
+    Obligatory: 
+    headdir = full path to (head) directory where all folders are stored, 
+	including the subject folders and scripts directory (that includes this script)
+    
+EOF
+    exit 1
+}
+
+[ _$1 = _ ] && Usage
+
+
+
 
 headdir=${1}
 

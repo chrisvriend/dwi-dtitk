@@ -122,7 +122,7 @@ ${scriptdir}/2d-DTITK_interreg-diffeo.sh ${headdir} mean_affine${Niter}.nii.gz m
 # warp images to template
 
 # warp dtitk files from subject space to group template for each timepoint
-${scriptdir}/03-DTITK_warp2template_v2.sh ${headdir}
+${scriptdir}/03-DTITK_warp2template.sh ${headdir}
 
 # make QC figures of warped scans
 ${scriptdir}/3c-DTITK_warpqc.sh ${headdir}/warps

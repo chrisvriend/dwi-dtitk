@@ -8,12 +8,37 @@
 # Written by C. Vriend - AmsUMC Jan 2023
 # c.vriend@amsterdamumc.nl
 
+
+# usage instructions
+Usage() {
+    cat <<EOF
+
+    (C) C.Vriend - 2/3/2023 - 2b-DTITK_interreg_rigid.sh
+   
+   WIP
+   
+
+    Usage: ./2b-DTITK_interreg-rigid.sh headdir
+    Obligatory: 
+    headdir = full path to (head) directory where all folders are stored, 
+	including the subject folders and scripts directory (that includes this script)
+    
+EOF
+    exit 1
+}
+
+[ _$4 = _ ] && Usage
+
+
+
 #########################################
 # Setup relevant software and variables
 #########################################
 module load dtitk/2.3.1
 module load fsl/6.0.5.1
 . ${DTITK_ROOT}/scripts/dtitk_common.sh
+
+
 
 
 # Sets up variables for folder with tensor images from all subjects and recommended template from DTI-TK

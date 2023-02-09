@@ -12,7 +12,31 @@
 #SBATCH --nice=2000
 #SBATCH -o 1-DTITK_%A_%a.log
 
-##disabled##SBATCH --array 1-11%11
+# usage instructions
+Usage() {
+    cat <<EOF
+
+    (C) C.Vriend - 2/3/2023 - 01-DTITK_long_fit+intrareg.sh
+    THIS SCRIPT IS FOR SAMPLES WITH LONGITUDINAL DATA (I.E. >2 TIMEPOINTS)
+	Perform DWI split to b1000, convert to DTITK compatible format and register 
+    DWI data from >2 timepoints to one common intra-subject template. 
+
+    note that if the sample also contains subjects with data at one timepoint 
+    (due to missing data) then all steps except intra-subject registration will
+    still be performed.
+   
+
+    Usage: ./01-DTITK_long_fit+intrareg.sh headdir
+    Obligatory: 
+    headdir = full path to (head) directory where all folders are stored, 
+	including the subject folders and scripts directory (that includes this script)
+    
+EOF
+    exit 1
+}
+
+[ _$1 = _ ] && Usage
+
 
 headdir=${1}
 

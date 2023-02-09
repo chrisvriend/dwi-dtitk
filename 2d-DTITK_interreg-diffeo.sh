@@ -3,6 +3,28 @@
 # Written by C. Vriend - AmsUMC Jan 2023
 # c.vriend@amsterdamumc.nl
 
+
+# usage instructions
+Usage() {
+    cat <<EOF
+
+    (C) C.Vriend - 2/3/2023 - 2d-DTITK_interreg_diffeo.sh
+   
+   WIP
+   
+
+    Usage: ./2d-DTITK_interreg-diffeo.sh headdir
+    Obligatory: 
+    headdir = full path to (head) directory where all folders are stored, 
+	including the subject folders and scripts directory (that includes this script)
+    
+EOF
+    exit 1
+}
+
+[ _$5 = _ ] && Usage
+
+
 #########################################
 # Setup relevant software and variables
 #########################################
