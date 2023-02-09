@@ -1,4 +1,5 @@
-# DTITK_template-diffvalues
+# DTITK INTER/INTRA TEMPLATE CREATION AND EXTRACTING DTI & NODDI MEASURES FROM WHITE-MATTER TRACTS 
+# AN AUTOMATED SLURM PIPELINE
 (C) Chris Vriend - Amsterdam UMC - feb ' 23
 
 c.vriend|amsterdamumc-dot-nl
