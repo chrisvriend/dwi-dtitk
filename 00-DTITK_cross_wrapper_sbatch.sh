@@ -12,6 +12,7 @@
 
 # HEAD-DIRECTORY/
 # ├── sub-XXX1
+#            ├── data.nii.gz, bvecs, bvals
 # ├── sub-XXX2
 # ├── sub-XXX3
 # ├── sub-XXX4
@@ -45,7 +46,7 @@
 ###############################
 ## input variables to change ##
 ###############################
-headdir=/home/anw/cvriend/my-scratch/DTITK_OBS
+headdir=${1}
 scriptdir=${headdir}/scripts
 ixitemplate=/data/anw/anw-gold/NP/doorgeefluik/ixi_aging_template_v3.0/template/ixi_aging_template.nii.gz
 NODDIarchive=/data/anw/anw-archive/NP/projects/archive_OBS/analysis/DWI2022/NODDI_output

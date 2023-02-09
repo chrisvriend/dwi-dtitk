@@ -55,7 +55,7 @@
 ###############################
 ## input variables to change ##
 ###############################
-headdir=/home/anw/cvriend/my-scratch/DTITK_TIPICCO2
+headdir=${1}
 scriptdir=${headdir}/scripts
 ixitemplate=/data/anw/anw-gold/NP/doorgeefluik/ixi_aging_template_v3.0/template/ixi_aging_template.nii.gz
 NODDIarchive=/data/anw/anw-archive/NP/projects/archive_TIPICCO/analysis/DWI/NODDI_output
@@ -67,7 +67,7 @@ cd ${headdir}
 nsubj=$(ls -d sub-*/ | wc -l)
 
 # split DWI scans, extract b1000, make DTITK compatible and perform intra-subject registration
-sbatch --wait --array="1-${nsubj}%${simul}" ${scriptdir}/01-DTITK_fit+intrareg.sh ${headdir}
+sbatch --wait --array="1-${nsubj}%${simul}" ${scriptdir}/01-DTITK_long_fit+intrareg.sh ${headdir}
 mkdir -p ${headdir}/logs
 mv 1-DTITK*.log ${headdir}/logs
 ##########################################################################################
