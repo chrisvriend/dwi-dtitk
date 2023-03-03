@@ -44,7 +44,7 @@ for tract in $(cat ${tractfile}); do
 
 if [ ! -f ${tract}_skl.nii.gz ]; then 
 echo "skeletonize ${tract}"
-fslmaths ${tract} -mul ${diffdir}/mean_FA_skeleton_mskd.nii.gz ${tract}_skl
+fslmaths ${tract} -mul ${diffdir}/mean_FA_skeleton_mskd.nii.gz -bin ${tract}_skl
 
 fi
 done
