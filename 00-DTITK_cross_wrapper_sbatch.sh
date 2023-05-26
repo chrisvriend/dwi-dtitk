@@ -8,11 +8,11 @@
 # Expect between 8-12 hours of processing time
 # change slurm partition acccordingly
 
-# Assumed data structure
+# Assumed data structure according bids
 
 # HEAD-DIRECTORY/
 # ├── sub-XXX1
-#            ├── data.nii.gz, bvecs, bvals
+#            ├── sub-XXX1_dwi-space_desc-preproc_dwi|.nii.gz/bvec/bval
 # ├── sub-XXX2
 # ├── sub-XXX3
 # ├── sub-XXX4
