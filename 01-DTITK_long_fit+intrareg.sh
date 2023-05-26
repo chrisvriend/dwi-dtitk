@@ -52,6 +52,7 @@ subj=$(sed "${SLURM_ARRAY_TASK_ID}q;d" subjects.txt)
 module load dtitk/2.3.1
 module load fsl/6.0.5.1
 module load Anaconda3/2022.05
+conda activate /scratch/anw/share/python_env/mrtrix
 synthstrip=/data/anw/anw-gold/NP/doorgeefluik/container_apps/synthstrip.1.2.sif
 ixitemplate=/data/anw/anw-gold/NP/doorgeefluik/ixi_aging_template_v3.0/template
 ###
@@ -80,10 +81,6 @@ for time in $(ls -d T?); do
         cd ${headdir}/${subj}/${time}
 
         echo "...${time}"
-        for d in vol_b0 b0_b1000; do
-
-            mkdir -p ${d}
-        done
 
         # create brainmask
         if [ ! -f nodif_brainmask.nii.gz ]; then
@@ -101,64 +98,25 @@ for time in $(ls -d T?); do
 
         fi
         slicer nodif nodif_brainmask -a ${headdir}/QC/${subj}_${time}_maskQC.png
-
-        echo "split DWI nifti"
-        fslsplit data.nii.gz
-
-        columns_b0=$(${scriptdir}/get_column_idx_in_range.py bvals 0 10)
-        for i in ${columns_b0}; do
-            mv vol$(printf "%04d\n" ${i}).nii.gz vol_b0
-        done
-        ${scriptdir}/copy_columns.py bvals bvecs_0 ${columns_b0}
-        ${scriptdir}/copy_columns.py bvecs bvecs_0 ${columns_b0}
-
-        for l in 1000; do
-
-            echo "b${l}:"
-            columns=$(${scriptdir}/get_column_idx_in_range.py bvals $((l - 20)) $((l + 20)))
-
-            for i in ${columns}; do
-                mv vol$(printf "%04d\n" $i).nii.gz b0_b${l}
-            done
-            sorted_columns=$(for i in ${columns_b0} ${columns}; do echo $i; done | sort -n)
-
-            #echo ${sorted_columns}
-
-            ${scriptdir}/copy_columns.py bvals bvals_${l} ${sorted_columns}
-            ${scriptdir}/copy_columns.py bvecs bvecs_${l} ${sorted_columns}
-
-            mv bvals_${l} b0_b${l}
-            mv bvecs_${l} b0_b${l}
-
-            cp nodif_brainmask.nii.gz b0_b${l}
-            cp vol_b0/* b0_b${l}
-
-            cd b0_b${l}
-
-            fslmerge -a b0_b${l} vol*
-            rm -f vol*
+        # extract b0 and b1000 shell
+        dwiextract data.nii.gz b0b1000.nii.gz -fslgrad bvecs bvals -shells 0,1000 \
+        -export_grad_fsl b1000.bvec b1000.bval 
 
             #########################################
             # dtifit
             #########################################
-            # run dtifit for each of the combinations
-
-            echo "commence dtifit on b0_b${l}"
-            dtifit -k b0_b${l} -m *mask* -r *bvec* -b *bvals* -o DWI_${subj}_${time}_b0_b${l} --sse
-            cd ..
-
+            dtifit -k b0_b1000 -m *mask* -r b1000.bvec -b b1000.bval -o DWI_${subj}_${time}_b0_b1000 --sse
+           rm b0b1000.nii.gz b1000.bvec b1000.bval
             #########################################
             # Make dtifit’s dti_V{123} and dti_L{123} compatible with DTI-TK
             #########################################
-            cd ${headdir}/${subj}/${time}/b0_b${l}
 
-            if [ ! -f ${headdir}/${subj}/DWI_${subj}_${time}_b0_b${l}_dtitk.nii.gz ]; then
+            if [ ! -f ${headdir}/${subj}/DWI_${subj}_${time}_b0_b1000_dtitk.nii.gz ]; then
 
-                fsl_to_dtitk DWI_${subj}_${time}_b0_b${l}
-                mv DWI_${subj}_${time}_b0_b${l}_dtitk.nii.gz ${headdir}/${subj}
+                fsl_to_dtitk DWI_${subj}_${time}_b0_b1000
+                mv DWI_${subj}_${time}_b0_b1000_dtitk.nii.gz ${headdir}/${subj}
                 rm -f *nonSPD.nii.gz *norm.nii.gz
             fi
-            rm ${headdir}/${subj}/${time}/vol*.nii.gz
         done
 
     fi
