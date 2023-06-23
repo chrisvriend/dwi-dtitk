@@ -19,7 +19,7 @@ Usage() {
 
     (C) C.Vriend - 2/3/2023 - 01-DTITK_cross_fit.sh
     THIS SCRIPT IS FOR SAMPLES WITH cross-SECTIONAL DATA (I.E. 1 TIMEPOINT)
-	Perform DWI split to b1000 and convert to DTITK compatible format for subsequent
+	Perform DWI split to b${bshell} and convert to DTITK compatible format for subsequent
     inter-subject registration 
 
     Usage: ./01-DTITK_cross_fit.sh headdir
@@ -32,8 +32,6 @@ EOF
 }
 
 [ _$1 = _ ] && Usage
-
-
 
 
 headdir=${1}
@@ -58,7 +56,7 @@ ixitemplate=/data/anw/anw-gold/NP/doorgeefluik/ixi_aging_template_v3.0/template
 # Sets up variables for folder with tensor images from all subjects and recommended template from DTI-TK
 
 scriptdir=${headdir}/scripts
-bshell=1000
+bshell=${bshell}
 Niter=5
 export DTITK_USE_QSUB=0
 
@@ -66,47 +64,77 @@ echo "-------"
 echo ${subj}
 echo "-------"
 
+# transfer to workdir 
+mkdir -p ${workdir}/${subj}
+rsync -av ${bidsdir}/${subj}/dwi ${workdir}/${subj}
+
 #########################################
 # DWI split
 #########################################
+cd ${workdir}/${subj}/dwi
 
-cd ${headdir}/${subj}
+if [ ! -f ${headdir}/${subj}/dwi/${subj}_space-dwi_desc-b${bshell}_dtitk.nii.gz ]; then
 
-if [ ! -f ${headdir}/${subj}/DWI_${subj}_b0_b1000_dtitk.nii.gz ]; then
-
+if [ -f ${subj}_space-dwi_desc-brain_mask.nii.gz ]; then
     # create brainmask
-    if [ ! -f nodif_brainmask.nii.gz ]; then
-        echo "create brain mask"
-        fslroi data dwinodif 0 2
-        fslmaths dwinodif -Tmean nodif
-        ${synthstrip} -i ${headdir}/${subj}/nodif.nii.gz \
-            -m ${headdir}/${subj}/nodif_brainmask.nii.gz
+        dwiextract -nthreads ${threads} \
+            ${subj}_space-dwi_desc-preproc_dwi.nii.gz - -bzero \
+            -fslgrad ${subj}_space-dwi_desc-preproc_dwi.bvec \
+            ${subj}_space-dwi_desc-preproc_dwi.bval | mrmath - mean ${subj}_space-dwi_desc-nodif_dwi.nii.gz -axis 3
+        # skullstrip mean b0 (nodif_brain)
+        apptainer run --cleanenv ${synthstrippath} \
+            -i ${subj}_space-dwi_desc-nodif_dwi.nii.gz \
+            -o ${subj}_space-dwi_desc-nodif-brain_dwi.nii.gz \
+            --mask ${subj}_space-dwi_desc-brain_mask.nii.gz
 
         # synthstrip does something weird to the header that leads to
         # warning messages in the next step. Therefore we clone the header
         # from the input image
-        fslcpgeom ${headdir}/${subj}/nodif.nii.gz \
-            ${headdir}/${subj}/nodif_brainmask.nii.gz
-    fi
+        fslcpgeom ${subj}_space-dwi_desc-nodif_dwi.nii.gz  \
+            ${subj}_space-dwi_desc-brain_mask.nii.gz   
+        slicer ${subj}_space-dwi_desc-nodif_dwi.nii.gz \
+        ${subj}_space-dwi_desc-brain_mask.nii.gz \
+        -a ${headdir}/${subj}/figures/${subj}_maskQC.png
+fi
 
-    slicer nodif nodif_brainmask -a ${headdir}/QC/${subj}_maskQC.png
-    # extract b0 and b1000 shell
-    dwiextract data.nii.gz b0b1000.nii.gz -fslgrad bvecs bvals -shells 0,1000 \
-    -export_grad_fsl b1000.bvec b1000.bval 
+ mrconvert ${subj}_space-dwi_desc-preproc_dwi.nii.gz \
+    -fslgrad ${subj}_space-dwi_desc-preproc_dwi.bvec \
+    ${subj}_space-dwi_desc-preproc_dwi.bval \
+    ${subj}_space-dwi_desc-preproc_dwi.mif
+
+ dwibiascorrect ants ${subj}_space-dwi_desc-preproc_dwi.mif \
+      ${subj}_space-dwi_desc-preproc-biascor_dwi.mif -nthreads ${threads} \
+      -bias ${subj}_space-dwi_desc-biasest_dwi.mif \
+      -scratch ${workdir}/${subj}/tempbiascorrect
+
+    # extract b0 and b${bshell} shell
+    dwiextract ${subj}space-dwi_desc-preproc-biascor_dwi.mif \
+		b0b${bshell}.mif -shells 0,${bshell}
+	mrconvert b0b${bshell}.mif ${subj}_space-dwi_desc-preproc-b${bshell}_dwi.nii.gz \
+		-export_grad_fsl b${bshell}.bvec b${bshell}.bval -force
+
+
 
         #########################################
         # dtifit
         #########################################
-        dtifit -k b0b1000 -m *mask* -r b1000.bvec -b b1000.bval -o DWI_${subj}_b0_b1000 --sse
-        rm b0b1000.nii.gz b1000.bvec b1000.bval
+
+if [ ! -f ${subj}_space-dwi_desc-preproc-b${bshell}_FA.nii.gz ]; then
+	echo -e "${BLUE}dtifit on b${bshell} shell${NC}"
+
+        dtifit -k ${subj}_space-dwi_desc-preproc-b${bshell}_dwi.nii.gz \
+		-m ${subj}_space-dwi_desc-brain_mask.nii.gz \
+		-r b${bshell}.bvec -b b${bshell}.bval \
+		-o ${subj}_space-dwi_desc-preproc-b${bshell} --sse
+	    rm b${bshell}.bv* b0b${bshell}.mif
+fi
+       
         #########################################
         # Make dtifit’s dti_V{123} and dti_L{123} compatible with DTI-TK
         #########################################
-        if [ ! -f ${headdir}/${subj}/DWI_${subj}_b0_b1000_dtitk.nii.gz ]; then
-            fsl_to_dtitk DWI_${subj}_b0_b1000
+        if [ ! -f ${workdir}/${subj}/dwi/${subj}_space-dwi_desc-b${bshell}_dtitk.nii.gz ]; then 
+            fsl_to_dtitk ${subj}_space-dwi_desc-preproc-b${bshell}
             rm -f *nonSPD.nii.gz *norm.nii.gz
-        mv DWI_${subj}_b0_b1000_dtitk.nii.gz \
-        ${headdir}/${subj}/DWI_${subj}_b0_b1000_dtitk.nii.gz
         fi
 fi
 

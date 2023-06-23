@@ -1,5 +1,7 @@
 #!/bin/bash 
 
+# bids compatible
+
 echo "prepare inter-subject registration pipeline"
 headdir=${1}
 
