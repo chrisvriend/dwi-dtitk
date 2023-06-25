@@ -25,9 +25,12 @@ module load fsl/6.0.5.1
 
 # perform cleanup of files in interreg folder yes (1) no (0)
 cleanup=1
+# shell 
+bshell=1000
 # warp native DTITK scans to group template
 headdir=${1}
 # headdir
+
 
 warpdir=${headdir}/warps
 regdir=${headdir}/interreg
@@ -82,7 +85,7 @@ if [ -f long_subjects.txt ]; then
 
 	for scan in $(cat ${regdir}/cross_subjects.txt); do
 
-		subj=${scan%_b0_b1000_dtitk.nii.gz*}
+		subj=${scan%_space-dwi_desc-b${bshell}_dtitk.nii.gz*}
 
 		echo "Warping cross-sectional images from native space to group-template space"
 

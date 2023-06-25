@@ -18,7 +18,7 @@ Usage() {
    WIP
    
 
-    Usage: ./2b-DTITK_interreg-rigid.sh headdir
+    Usage: ./2b-DTITK_interreg-rigid.sh workdir scriptdir template subjects simultaneous
     Obligatory: 
     headdir = full path to (head) directory where all folders are stored, 
 	including the subject folders and scripts directory (that includes this script)
@@ -42,12 +42,11 @@ module load fsl/6.0.5.1
 
 
 # Sets up variables for folder with tensor images from all subjects and recommended template from DTI-TK
-headdir=${1}
-workdir=${headdir}/interreg
-scriptdir=${headdir}/scripts
-template=${2} # ixi template
-subjects=${3} # inter_subjects.txt
-simul=${4}
+workdir=${1}
+scriptdir=${2}
+template=${3} # ixi template
+subjects=${4} # inter_subjects.txt
+simul=${5}
 
 
 #########################################

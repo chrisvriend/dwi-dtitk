@@ -30,7 +30,7 @@ module load fsl
 echo "extract diffusion measures"
 
 headdir=${1}
-NODDIdir=${2}
+bidsdir=${2}
 warpdir=${headdir}/warps
 regdir=${headdir}/interreg
 diffdir=${headdir}/diffmaps
@@ -61,7 +61,10 @@ for scan in $(ls -1 *2templatespace.dtitk.nii.gz); do
     # #############################################
     # http://dti-tk.sourceforge.net/pmwiki/pmwiki.php?n=Documentation.OptionspostReg
     
-    if [ ! -d ${NODDIdir}/${subj}.NODDI_Watson ]; then 
+
+    # how to do this for when there are multiple sessions? 
+
+    if [ ! -d ${bidsdir}/${subj}/dwi/${subj}.NODDI_Watson ]; then 
       subjbase=${subj#sub-*}
 
       if [ ! -d ${NODDIdir}/${subjbase}.NODDI_Watson ]; then 
@@ -74,8 +77,8 @@ for scan in $(ls -1 *2templatespace.dtitk.nii.gz); do
     fi
 
 
-    rsync -av --exclude "Dtifit" --exclude "FitFractions" --exclude "GridSeach" \
-      --exclude "logs" ${NODDIdir}/${subjbase}.NODDI_Watson ${tempdir}
+    # rsync -av --exclude "Dtifit" --exclude "FitFractions" --exclude "GridSeach" \
+    #   --exclude "logs" ${NODDIdir}/${subjbase}.NODDI_Watson ${tempdir}
     # make DTI-TK compatible
     cd ${tempdir}
     # check and change names

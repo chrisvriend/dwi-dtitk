@@ -10,7 +10,7 @@ cd ${headdir}/interreg
 
 # DTITK can't handle having these files in separate folders.
 # these files therefore need to be combined into one folder
-find .. -maxdepth 2 -name "*dtitk.nii.gz"  > scans.txt
+find .. -maxdepth 3 -name "*dtitk.nii.gz"  > scans.txt
 
 
 for scan in `cat scans.txt`; do

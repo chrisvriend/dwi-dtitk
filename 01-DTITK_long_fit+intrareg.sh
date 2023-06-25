@@ -26,9 +26,9 @@ Usage() {
     still be performed.
    
 
-    Usage: ./01-DTITK_long_fit+intrareg.sh headdir
+    Usage: ./01-DTITK_long_fit+intrareg.sh workdir
     Obligatory: 
-    headdir = full path to (head) directory where all folders are stored, 
+    workdir = full path to (head) directory where all folders are stored, 
 	including the subject folders and scripts directory (that includes this script)
     
 EOF
@@ -38,13 +38,19 @@ EOF
 [ _$1 = _ ] && Usage
 
 
-headdir=${1}
+workdir=${1}
+bidsdir=${2}
 
-cd ${headdir}
-QCdir=${headdir}/QC
+QCdir=${workdir}/QC
 mkdir -p ${QCdir}
+cd ${bidsdir}
 ls -d sub-*/ | sed 's:/.*::' >subjects.txt
 subj=$(sed "${SLURM_ARRAY_TASK_ID}q;d" subjects.txt)
+# random delay
+duration=$((RANDOM % 60 + 2))
+echo -e "${YELLOW}INITIALIZING...(wait a sec)${NC}"
+echo
+sleep ${duration}
 
 #########################################
 # Setup relevant software and variables
@@ -59,7 +65,7 @@ ixitemplate=/data/anw/anw-gold/NP/doorgeefluik/ixi_aging_template_v3.0/template
 
 # Sets up variables for folder with tensor images from all subjects and recommended template from DTI-TK
 
-scriptdir=${headdir}/scripts
+scriptdir=${workdir}/scripts
 bshell=1000
 Niter=5
 export DTITK_USE_QSUB=0
@@ -72,32 +78,32 @@ echo "-------"
 # DWI split
 #########################################
 
-cd ${headdir}/${subj}
+cd ${workdir}/${subj}
 
-for time in $(ls -d T?); do
+for session in $(ls -d ses-[Tt]?); do
 
-    if [ ! -f ${headdir}/${subj}/DWI_${subj}_${time}_b0_b1000_dtitk.nii.gz ]; then
+    if [ ! -f ${workdir}/${subj}/DWI_${subj}_${session}_b0_b1000_dtitk.nii.gz ]; then
 
-        cd ${headdir}/${subj}/${time}
+        cd ${workdir}/${subj}/${session}
 
-        echo "...${time}"
+        echo "...${session}"
 
         # create brainmask
         if [ ! -f nodif_brainmask.nii.gz ]; then
             echo "create brain mask"
             fslroi data dwinodif 0 2
             fslmaths dwinodif -Tmean nodif
-            ${synthstrip} -i ${headdir}/${subj}/${time}/nodif.nii.gz \
-                -m ${headdir}/${subj}/${time}/nodif_brainmask.nii.gz
+            ${synthstrip} -i ${workdir}/${subj}/${session}/nodif.nii.gz \
+                -m ${workdir}/${subj}/${session}/nodif_brainmask.nii.gz
 
             # synthstrip does something weird to the header that leads to
             # warning messages in the next step. Therefore we clone the header
             # from the input image
-            fslcpgeom ${headdir}/${subj}/${time}/nodif.nii.gz \
-                ${headdir}/${subj}/${time}/nodif_brainmask.nii.gz
+            fslcpgeom ${workdir}/${subj}/${session}/nodif.nii.gz \
+                ${workdir}/${subj}/${session}/nodif_brainmask.nii.gz
 
         fi
-        slicer nodif nodif_brainmask -a ${headdir}/QC/${subj}_${time}_maskQC.png
+        slicer nodif nodif_brainmask -a ${workdir}/QC/${subj}_${session}_maskQC.png
         # extract b0 and b1000 shell
         dwiextract data.nii.gz b0b1000.nii.gz -fslgrad bvecs bvals -shells 0,1000 \
         -export_grad_fsl b1000.bvec b1000.bval 
@@ -105,23 +111,23 @@ for time in $(ls -d T?); do
             #########################################
             # dtifit
             #########################################
-            dtifit -k b0_b1000 -m *mask* -r b1000.bvec -b b1000.bval -o DWI_${subj}_${time}_b0_b1000 --sse
+            dtifit -k b0_b1000 -m *mask* -r b1000.bvec -b b1000.bval -o DWI_${subj}_${session}_b0_b1000 --sse
            rm b0b1000.nii.gz b1000.bvec b1000.bval
             #########################################
             # Make dtifit’s dti_V{123} and dti_L{123} compatible with DTI-TK
             #########################################
 
-            if [ ! -f ${headdir}/${subj}/DWI_${subj}_${time}_b0_b1000_dtitk.nii.gz ]; then
+            if [ ! -f ${workdir}/${subj}/DWI_${subj}_${session}_b0_b1000_dtitk.nii.gz ]; then
 
-                fsl_to_dtitk DWI_${subj}_${time}_b0_b1000
-                mv DWI_${subj}_${time}_b0_b1000_dtitk.nii.gz ${headdir}/${subj}
+                fsl_to_dtitk DWI_${subj}_${session}_b0_b1000
+                mv DWI_${subj}_${session}_b0_b1000_dtitk.nii.gz ${workdir}/${subj}
                 rm -f *nonSPD.nii.gz *norm.nii.gz
             fi
         done
 
     fi
     echo
-    echo "done with timepoint = ${time} "
+    echo "done with timepoint = ${session} "
     echo
 done
 echo
@@ -135,7 +141,7 @@ echo
 echo "continue with intra-subject registration"
 echo
 
-cd ${headdir}/${subj}
+cd ${workdir}/${subj}
 
 ls -1 *dtitk.nii.gz > ${subj}.txt
 
@@ -197,7 +203,7 @@ if test $(cat ${subj}.txt | wc -l) -gt 1; then
     # Creates non-linear transform from
     #individual timepoint to subject-specific template
     #########################################
-    cd ${headdir}/${subj}
+    cd ${workdir}/${subj}
     for session in $(ls -d T?); do
         if [ ! -f DWI_${subj}_${session}_combined.df.nii.gz ]; then
             echo "Making non-linear transform for timepoint ${session}"
@@ -268,7 +274,7 @@ fi
 
 	# 	rm ${subj}_intrareg_${session}.nii.gz
 	# done
-	cd ${headdir}
+	cd ${workdir}
 
 else
 

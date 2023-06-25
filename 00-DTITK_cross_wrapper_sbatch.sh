@@ -46,20 +46,22 @@
 ###############################
 ## input variables to change ##
 ###############################
-bidsdir=${1}
+preprocdir=${1}
 workdir=${2}
-scriptdir=/path/to/scripts/
+scriptdir=/home/anw/cvriend/my-scratch/gitrepo/DTITK_template-diffvalues
 ixitemplate=/data/anw/anw-gold/NP/doorgeefluik/ixi_aging_template_v3.0/template/ixi_aging_template.nii.gz
 #NODDIarchive=/data/anw/anw-archive/NP/projects/archive_OBS/analysis/DWI2022/NODDI_output
 
-simul=12 # number of subjects to process simultaneously
+simul=2 # number of subjects to process simultaneously
 Niter=5 # number of iteratiosn for affine registration to template (default = 5)
 bshell=1000
+cd ${preprocdir}
+nsubj=$(ls -d sub-300?/ | wc -l)
+ls -d sub-300?/ | sed 's:/.*::' > subjects.txt
 cd ${workdir}
-nsubj=$(ls -d sub-*/ | wc -l)
 
 # split DWI scans, extract b1000, make DTITK compatible and perform intra-subject registration
-sbatch --wait --array="1-${nsubj}%${simul}" ${scriptdir}/01-DTITK_cross_fit.sh ${bidsdir}
+sbatch --wait --array="1-${nsubj}%${simul}" ${scriptdir}/01-DTITK_cross_fit.sh ${preprocdir} ${workdir} ${preprocdir}/subjects.txt
 mkdir -p ${workdir}/logs
 mv 1-DTITK*.log ${workdir}/logs
 ##########################################################################################
@@ -90,9 +92,12 @@ fi
 
 ## clean up ## - still needs a better look
 for subj in ${subjfolders}; do
-        if [ -f ${workdir}/${subj}/dwi/${subj}_space-dwi_desc-b${bshell}_dtitk.nii.gz ]; then
-        rm ${workdir}/${subj}/dwi/${subj}_space-dwi_desc-preproc_dwi.* \
-        ${workdir}/${subj}/dwi/*.mif
+        if [ -f ${workdir}/${subj}/dwi/${subj}_space-dwi_desc-preproc-b${bshell}_dtitk.nii.gz ]; then
+        rm -f ${workdir}/${subj}/dwi/${subj}_space-dwi_desc-preproc_dwi.* \
+        ${workdir}/${subj}/dwi/*.mif ${workdir}/${subj}/dwi/${subj}_space-dwi_desc-preproc-b${bshell}_??.nii.gz \
+        ${workdir}/${subj}/dwi/${subj}_space-dwi_desc-brain-uncorrected_mask.nii.gz \
+        ${workdir}/${subj}/dwi/${subj}_space-dwi_label-cnr-maps_desc-preproc_dwi.nii.gz \
+        ${workdir}/${subj}/dwi/${subj}_space-dwi_label-WM_mask.nii.gz
         fi
 done
 
@@ -103,10 +108,10 @@ done
 ${scriptdir}/2a-DTITK_cross_prepinterreg.sh ${workdir}
 
 # perform rigid/affine inter-subject registration to make initial template
-${scriptdir}/2b-DTITK_interreg-rigid.sh ${workdir} ${ixitemplate} inter_subjects.txt ${simul}
+${scriptdir}/2b-DTITK_interreg-rigid.sh ${workdir}/interreg ${scriptdir} ${ixitemplate} inter_subjects.txt ${simul}
 
 # perform affine inter-subject registration to make affine template
-${scriptdir}/2c-DTITK_interreg-affine.sh ${workdir} inter_subjects.txt ${Niter} ${simul}
+${scriptdir}/2c-DTITK_interreg-affine.sh ${workdir}/interreg ${scriptdir} inter_subjects.txt ${Niter} ${simul}
 
 cd ${workdir}/interreg
 ls -1 sub-*_aff.nii.gz >inter_subjects_aff.txt
@@ -128,7 +133,7 @@ ${scriptdir}/3c-DTITK_warpqc.sh ${workdir}/warps
 
 # needs complete revision!!
 
-${scriptdir}/04-DTITK_makediffmaps.sh ${workdir} ${bidsdir}
+${scriptdir}/04-DTITK_makediffmaps.sh ${workdir} ${preprocdir}
 
 # make skeleton image and skeletonized diffusion maps
 ln -sf ${workdir}/warps/mean_final_high_res.nii.gz ${workdir}/diffmaps/mean_final_high_res.nii.gz
