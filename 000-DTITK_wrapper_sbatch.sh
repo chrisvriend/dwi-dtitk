@@ -80,6 +80,7 @@ EOF
 ###############################
 preprocdir=${1}
 workdir=${2}
+outputdir=${3}
 scriptdir=${PWD} # assuming that all scripts are alongside this one
 ixitemplate=/data/anw/anw-gold/NP/doorgeefluik/ixi_aging_template_v3.0/template/ixi_aging_template.nii.gz
 
@@ -140,7 +141,7 @@ ln -sf ${workdir}/warps/mean_final_high_res.nii.gz ${workdir}/diffmaps/mean_fina
 ${scriptdir}/005-DTITK_TBSS.sh ${workdir}/diffmaps 
 
 # warp JHU-ICBM atlas tracts to group template and extract several tracts
-sbatch --wait ${scriptdir}/06-DTITK_warpatlas2template.sh ${workdir} ${scriptdir}/JHU-ICBM.labels
+sbatch --wait ${scriptdir}/006-DTITK_warpatlas2template.sh ${workdir} ${scriptdir}/JHU-ICBM.labels
 
 # produce tractfile that contains all tracts.
 # manually adjust if you  only want to consider a specific set of tracts.
@@ -154,9 +155,13 @@ cd ${workdir}
 # extract median diff values
 ${scriptdir}/007-DTITK_extract-diffvalues.sh ${workdir} ${workdir}/tracts/tractfile.txt ${scriptdir}
 
+###########################################################################################
+# create output
+
+
 #############
 ### DONE ####
 #############
 echo "DONE"
 echo "final output for statistical analysis can be found in ${workdir}/diffvalues"
-echo "do not forget to visual inspect the registrations to the templates and skeletonization "
+echo "do not forget to visual inspect the registrations to the templates and skeletonization"
