@@ -11,6 +11,8 @@ import os
 import pandas as pd
 import argparse
 
+class UnexpectedNdiff(Exception):
+    pass
 
 parser = argparse.ArgumentParser('restructure txt files with diffusion measures into csv table format')
 
@@ -28,11 +30,10 @@ workdir=args.workdir
 outputdir=args.outdir
 subjid=args.subjid
 
-diffmeasures=['AD', 'FA', 'MD', 'RD', 'OD', 'ND','FW']
 
-# workdir='/home/anw/cvriend/my-scratch/DTITK_TIPICCO/diffmaps'
-# subjid='sub-TIPICCO031_T0'
-# outputdir='/home/anw/cvriend/my-scratch/DTITK_TIPICCO/diffoutput'
+diffnoddi=['AD', 'FA', 'MD', 'RD', 'OD', 'ND','FW']
+diff=['AD', 'FA', 'MD', 'RD']
+
 
 # list comprehension | find directories in work directory that start with sub-
 diff_files=[ diff_files for diff_files in os.listdir(workdir)
@@ -47,7 +48,14 @@ for diff_file in diff_files:
     df=pd.read_csv(diff_file,delim_whitespace=True,header=None)
     temp=diff_file.split('_diffvalues')[0].split(subjid + '_')[1]
     df.columns=[temp]
-    df['diff']=diffmeasures
+
+    if df.shape[0] == 7:
+        df['diff']=diffnoddi
+    elif df.shape[0] == 4:    
+        df['diff']=diff
+    else:
+        raise UnexpectedNdiff("Error: Unexpected number of diff measures. Script cannot continue.")
+
     df=df.set_index(['diff'])
     list_df.append(df)
 

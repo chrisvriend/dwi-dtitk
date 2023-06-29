@@ -6,7 +6,7 @@
 #SBATCH --job-name=atlas2template
 #SBATCH --mem=16G
 #SBATCH --partition=luna-cpu-short
-#SBATCH --qos=anw-cpu-big
+#SBATCH --qos=anw-cpu
 #SBATCH --cpus-per-task=16
 #SBATCH --time=00-0:30:00
 #SBATCH --nice=2000
@@ -20,9 +20,9 @@ Usage() {
     (C) C.Vriend - 2/3/2023 - 06-DTITK_warpatlas2template.sh
 	warp atlas of WM tracts (default = JHU ICBM 1mm) to group template
 
-    Usage: ./06-DTITK_warpatlas2template.sh diffdir
+    Usage: ./06-DTITK_warpatlas2template.sh workdir labelfile
     Obligatory: 
-    diffdir = full path to working (head) directory where all folders are situated, 
+    workdir = full path to working (head) directory where all folders are situated, 
 	including the subject folders (see wrapper script)
     labelfile = full path to file that contains the names of the tracts and the intensity values in the atlas image
     
@@ -33,22 +33,18 @@ EOF
 [ _$2 = _ ] && Usage
 
 
-
-
-
-
-
 threads=16
 
 # source software
-module load fsl/6.0.5.1
+module load fsl/6.0.6.5
 module load ANTs/2.4.1
 
-headdir=${1}
-diffdir=${headdir}/diffmaps
-tractdir=${headdir}/tracts
-mkdir -p ${tractdir}
+workdir=${1}
 labelfile=${2}
+
+diffdir=${workdir}/diffmaps
+tractdir=${workdir}/tracts
+mkdir -p ${tractdir}
 
 cd ${diffdir}
 if [ ! -f ICBM2FA1Warp.nii.gz ]; then 
@@ -72,8 +68,6 @@ echo "inverting JHU atlas"
  mv temp.nii.gz ${tractdir}/JHU-ICBM-labels_templatespace.nii.gz
 fi 
 
-
-#for tract in 3 4 5 29 30 31 32 35 36 37 38 41 42 45 46; do
 for tract in CCg CCb CCs aLIC_R aLIC_L PTR_R PTR_L SagS_R SagS_L CingCG_R CingCG_L CingHIPP_R CingHIPP_L SLF_R SLF_L UncF_R UncF_L; do 
 
 tractID=$(cat ${labelfile} | grep ${tract} | awk '{print $1}' )

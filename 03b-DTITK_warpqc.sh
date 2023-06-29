@@ -23,18 +23,15 @@ EOF
 
 [ _$1 = _ ] && Usage
 
-
-
 module load dtitk/2.3.1
-module load fsl/6.0.5.1
-
+module load fsl/6.0.6.5
 
 warpdir=${1}
 
-echo "make overlays for quality checks"
+echo "make overlays for quality inspection"
 cd ${warpdir}
 
-ls -1 *2templatespace.dtitk.nii.gz > subjs_warped.txt
+ls -1 *res-?mm_dtitk.nii.gz > subjs_warped.txt
 TVMean -in subjs_warped.txt -out mean_final_high_res.nii.gz
 TVEigenSystem -in mean_final_high_res.nii.gz -type FSL 
 mv mean_final_high_res_L3.nii.gz mean_final_high_res_regcheck.nii.gz
@@ -43,9 +40,12 @@ rm mean_final_high_res_??.nii.gz
 mkdir -p ${warpdir}/QC
 
 for subj in $(cat subjs_warped.txt); do
-  stem=${subj%_2templatespace.dtitk.nii.gz*}
+  stem=${subj%_space-template_desc-b1000*}
   stam=${subj%.nii.gz*}
+  echo "--------"
   echo ${stem}
+  echo "--------"
+
   TVEigenSystem -in ${subj} -type FSL
   slicer mean_final_high_res_regcheck.nii.gz ${stam}_L3 -a ${warpdir}/QC/${stem}_overlay.png
   rm ${stam}_??.nii.gz

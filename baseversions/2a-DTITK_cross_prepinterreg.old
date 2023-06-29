@@ -12,15 +12,5 @@ cd ${headdir}/interreg
 # these files therefore need to be combined into one folder
 find .. -maxdepth 3 -name "*dtitk.nii.gz"  > scans.txt
 
-
-for scan in `cat scans.txt`; do
-	base=$(echo ${scan} | sed 's:.*/::')
-	base2=${base#DWI_*}
-	# make symbolic link
-	ln -s ${scan} ${base2}
-	# alternatively use move
-	#mv ${scan} .
-
-done
 # create lists for DTI-TK registration
 ls -1 sub-*.nii.gz > inter_subjects.txt

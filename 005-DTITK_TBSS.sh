@@ -21,7 +21,7 @@ EOF
 [ _$1 = _ ] && Usage
 
 module load dtitk/2.3.1
-module load fsl/6.0.5.1
+module load fsl/6.0.6.5
 
 diffdir=${1}
 
@@ -44,20 +44,32 @@ fi
 
 # restructure diff maps and merge (AD FA MD RD OD ND FW)
 rm -f subjects.list
-for diffscan in $(ls -1 *_dtitk_diffusion.nii.gz); do
+ndiffvols=$(fslnvols $(ls -1 *space-template_desc-diffmaps_res-?mm_dtitk.nii.gz | head -1))
+if ((ndiffvols == 7)); then
+    diffs=(AD FA MD RD OD ND FW)
+elif ((ndiffvols == 4)); then
+    diffs=(AD FA MD RD)
+else
+    echo "ERROR! diffmaps do not have the correct number of volumes"
+    exit
+fi
 
-    subj=${diffscan%_dtitk_diffusion.nii.gz*}
-    echo ${subj} >>subjects.list
+for diffscan in $(ls -1 *space-template_desc-diffmaps_res-?mm_dtitk.nii.gz); do
+
+    subj_session=${diffscan%_space-template_desc-diffmaps*}
+
+    echo ${subj_session} >> subjects.list
 done
 
 echo "merge diffusion maps together"
-for diff in AD FA MD RD OD ND FW; do
+
+for diff in ${diffs[@]}; do
     if [ ! -f all_${diff}.nii.gz ]; then
 
-        echo "Diffusion measure = ${diff}"
-        for diffscan in $(ls -1 *_dtitk_diffusion.nii.gz); do
+        echo " | ${diff} | "
+        for diffscan in $(ls -1 *space-template_desc-diffmaps_res-?mm_dtitk.nii.gz); do
 
-            subj=${diffscan%_dtitk_diffusion.nii.gz*}
+            subj_session=${diffscan%_space-template_desc-diffmaps*}
 
             if [[ ${diff} == "AD" ]]; then
                 vol=0
@@ -78,7 +90,7 @@ for diff in AD FA MD RD OD ND FW; do
                 break
             fi
 
-            fslroi ${diffscan} DWI_${subj}_${diff}.nii.gz ${vol} 1
+            fslroi ${diffscan} DWI_${subj_session}_${diff}.nii.gz ${vol} 1
 
         done
         fslmerge -t all_${diff} $(ls DWI_*_${diff}.nii.gz)
@@ -86,9 +98,9 @@ for diff in AD FA MD RD OD ND FW; do
 
     fi
 done
-
+echo
 echo "merging complete"
-
+echo
 # apply fslmaths to all_FA to create a combined binary mask volume called mean_FA_mask
 if [ ! -f mean_FA_mask.nii.gz ]; then
     echo "create masks of diff images"
@@ -98,8 +110,8 @@ if [ ! -f mean_FA_skeleton_mskd.nii.gz ]; then
     echo "mask skeleton"
     fslmaths mean_FA_skeleton -mas mean_FA_mask mean_FA_skeleton_mskd
 fi
-for diff in AD MD RD OD ND FW; do
-
+for diff in ${diffs[@]}; do
+    if [ ${diff} == FA ]; then continue; fi
     fslmaths all_${diff} -mas mean_FA_mask all_${diff}
 done
 
@@ -108,9 +120,9 @@ cp mean_FA.nii.gz mean_FA_skeleton_mskd.nii.gz mean_FA_mask.nii.gz tbss/stats
 
 cd tbss/stats
 
-for diff in AD FA MD RD OD ND FW; do
-ln -sf ../../all_${diff}.nii.gz  all_${diff}.nii.gz
-done 
+for diff in ${diffs[@]}; do
+    ln -sf ../../all_${diff}.nii.gz all_${diff}.nii.gz
+done
 
 mv mean_FA_skeleton_mskd.nii.gz mean_FA_skeleton.nii.gz
 
@@ -128,7 +140,8 @@ fi
 cd stats
 
 # non-FA processing
-for diff in MD AD RD OD ND FW; do
+for diff in ${diffs[@]}; do
+    if [ ${diff} == FA ]; then continue; fi
     cd ${diffdir}/tbss/stats
     if [ ! -f all_${diff}_skeletonised.nii.gz ]; then
 
@@ -152,7 +165,7 @@ for diff in MD AD RD OD ND FW; do
         counter=$(($counter + 1))
         unset subjid
     done
-    ls -1 vol*.nii.gz > vols.txt 2> /dev/null
+    ls -1 vol*.nii.gz >vols.txt 2>/dev/null
 
     if test $(cat vols.txt | wc -l) -gt 0; then
         echo "WARNING!!! something went wrong with renaming the skeletonized volumes"
@@ -162,6 +175,7 @@ for diff in MD AD RD OD ND FW; do
     fi
 
 done
+
 # still need to do it for FA
 cd ${diffdir}/tbss/stats/temp
 
@@ -175,7 +189,7 @@ for vol in $(ls -1 vol*.nii.gz); do
     counter=$(($counter + 1))
     unset subjid
 done
-ls -1 vol*.nii.gz > vols.txt 2> /dev/null
+ls -1 vol*.nii.gz >vols.txt 2>/dev/null
 
 if test $(cat vols.txt | wc -l) -gt 0; then
     echo "WARNING!!! something went wrong with renaming the skeletonized volumes"
@@ -187,11 +201,13 @@ fi
 # merge skeletonized maps back to subject-specific 4D image
 for subjid in $(cat ${diffdir}/subjects.list); do
 
-    fslmerge -t ${diffdir}/${subjid}_dtitk_diffusion_sklt.nii.gz \
-        ${subjid}_AD_skeleton.nii.gz ${subjid}_FA_skeleton.nii.gz ${subjid}_MD_skeleton.nii.gz \
-        ${subjid}_RD_skeleton.nii.gz ${subjid}_OD_skeleton.nii.gz ${subjid}_ND_skeleton.nii.gz \
-        ${subjid}_FW_skeleton.nii.gz
-
+    rm -f ${subjid}.tmp
+    for diff in ${diffs[@]}; do
+        echo ${subjid}_${diff}_skeleton.nii.gz >> ${subjid}.tmp
+    done
+    fslmerge -t ${diffdir}/${subjid}_space-template_desc-skldiffmaps_res-1mm_dtitk.nii.gz \
+        $(cat ${subjid}.tmp)
+    rm ${subjid}.tmp
 done
 
-rm -r ${diffdir}/tbss/stats/temp
+#rm -r ${diffdir}/tbss/stats/temp

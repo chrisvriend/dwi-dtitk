@@ -1,0 +1,946 @@
+/var/spool/slurm/slurmd/job149584/slurm_script: line 98: cd: /home/anw/cvriend/my-scratch/dwi-dtitk5: No such file or directory
+Submitted batch job 149585
+touch: cannot touch '/failed.check': Permission denied
+cat: /sub-3001/sub-3001.txt: No such file or directory
+cat: /sub-3002/sub-3002.txt: No such file or directory
+cat: /sub-3003/sub-3003.txt: No such file or directory
+cat: /sub-3004/sub-3004.txt: No such file or directory
+cat: /sub-3005/sub-3005.txt: No such file or directory
+cat: /sub-3006/sub-3006.txt: No such file or directory
+cat: /sub-3007/sub-3007.txt: No such file or directory
+cat: /sub-3009/sub-3009.txt: No such file or directory
+cat: /failed.check: No such file or directory
+rm: cannot remove '/failed.check': No such file or directory
+cat: /sub-3001/sub-3001.txt: No such file or directory
+cat: /sub-3002/sub-3002.txt: No such file or directory
+cat: /sub-3003/sub-3003.txt: No such file or directory
+cat: /sub-3004/sub-3004.txt: No such file or directory
+cat: /sub-3005/sub-3005.txt: No such file or directory
+cat: /sub-3006/sub-3006.txt: No such file or directory
+cat: /sub-3007/sub-3007.txt: No such file or directory
+cat: /sub-3009/sub-3009.txt: No such file or directory
+prepare inter-subject registration pipeline
+no subjects with only one session
+
+CROSS-SECTIONAL data
+
+
+there are a total of 8 to process
+running on host: luna-02
+command: /scratch/anw/cvriend/gitrepo/DTITK_template-diffvalues/2b-DTITK_interreg-rigid.sh /home/anw/cvriend/my-scratch/dwi-dtitk5/interreg /scratch/anw/cvriend/gitrepo/DTITK_template-diffvalues /data/anw/anw-gold/NP/doorgeefluik/ixi_aging_template_v3.0/template/ixi_aging_template.nii.gz inter_subjects.txt 7
+
+dti_rigid_reg - count = 1
+Submitted batch job 149593
+dti_affine_reg - count = 1
+Submitted batch job 149602
+inFile = dti_template_bootstrap_4660
+outFile = mean_initial.nii.gz
+type = ORIGINAL
+interpolation option is LEI
+subject 1 : sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.085653s
+subject 2 : sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.084779s
+Adding sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.006255s
+subject 3 : sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.079696s
+Adding sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add.nii.gz ... Done in 0.006345s
+subject 4 : sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.084479s
+Adding sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add.nii.gz ... Done in 0.006295s
+subject 5 : sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.083514s
+Adding sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add.nii.gz ... Done in 0.006276s
+subject 6 : sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.080188s
+Adding sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add_add.nii.gz ... Done in 0.006316s
+subject 7 : sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.0832s
+Adding sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add_add_add.nii.gz ... Done in 0.005339s
+subject 8 : sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.067224s
+Adding sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add_add_add_add.nii.gz ... Done in 0.005306s
+Voxelwise scaling sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add_add_add_add_add.nii.gz by 0.125 ... Done in 0.003911s
+Writing mean_initial.nii.gz ... Done in 0.282401s
+Initial bootstrapped template is computed and saved as mean_initial.nii.gz
+running on host: luna-02
+command: /scratch/anw/cvriend/gitrepo/DTITK_template-diffvalues/2c-DTITK_interreg-affine.sh /home/anw/cvriend/my-scratch/dwi-dtitk5/interreg /scratch/anw/cvriend/gitrepo/DTITK_template-diffvalues inter_subjects.txt 5 7
+
+command:  /home/anw/cvriend/my-scratch/dwi-dtitk5/interreg /scratch/anw/cvriend/gitrepo/DTITK_template-diffvalues inter_subjects.txt 5 7
+Thu Jun 29 12:43:37 CEST 2023
+Running affine registration to initial template
+dti_affine_population iteration 1
+Submitted batch job 149610
+Input affine transformation = [10.491,  8.646, -1.042]
+[ 0.942, -0.021,  0.094; -0.014,  1.084, -0.038; -0.070, -0.048,  1.118]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3001_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3001_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3001_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.076707s
+trans (inverse) applied = [13.737, 18.683,  3.895]
+[ 0.910, -0.010,  0.080; -0.009,  0.951,  0.020; -0.066,  0.012,  0.950]
+reading output volume specification from mean_affine0.nii.gz
+backward resampling ...time consumed = 0.441
+Writing _aff.nii.gz ... Done in 0.382s
+Input affine transformation = [-4.689, -12.112, -9.770]
+[ 1.078, -0.002,  0.041;  0.009,  1.184, -0.089; -0.031, -0.090,  1.244]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3002_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3002_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3002_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.079165s
+trans (inverse) applied = [-1.095, -1.307, -4.482]
+[ 1.042,  0.005,  0.036;  0.014,  1.037, -0.018; -0.029, -0.019,  1.055]
+reading output volume specification from mean_affine0.nii.gz
+backward resampling ...time consumed = 0.404
+Writing _aff.nii.gz ... Done in 0.308s
+Input affine transformation = [ 1.027,  0.634, -1.525]
+[ 1.038,  0.030,  0.007; -0.029,  1.128,  0.011; -0.008, -0.110,  1.135]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3003_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3003_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3003_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.062289s
+trans (inverse) applied = [ 4.625, 11.292,  3.103]
+[ 1.004,  0.031,  0.009; -0.024,  0.993,  0.064; -0.007, -0.042,  0.961]
+reading output volume specification from mean_affine0.nii.gz
+backward resampling ...time consumed = 0.358
+Writing _aff.nii.gz ... Done in 0.307s
+Input affine transformation = [15.978,  5.469, -15.320]
+[ 1.008, -0.084, -0.006;  0.015,  1.128, -0.088;  0.024, -0.046,  1.137]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3004_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3004_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3004_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.062448s
+trans (inverse) applied = [18.334, 15.761, -9.975]
+[ 0.974, -0.069, -0.008;  0.019,  0.988, -0.021;  0.024,  0.015,  0.966]
+reading output volume specification from mean_affine0.nii.gz
+backward resampling ...time consumed = 0.345
+Writing _aff.nii.gz ... Done in 0.311s
+Input affine transformation = [12.265, -6.594, -14.150]
+[ 1.012, -0.058,  0.007;  0.040,  1.173, -0.070; -0.006, -0.061,  1.190]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3005_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3005_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3005_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.062944s
+trans (inverse) applied = [14.940,  4.297, -8.775]
+[ 0.977, -0.047,  0.005;  0.044,  1.028, -0.003; -0.005,  0.004,  1.011]
+reading output volume specification from mean_affine0.nii.gz
+backward resampling ...time consumed = 0.338
+Writing _aff.nii.gz ... Done in 0.307s
+Input affine transformation = [ 0.252, -3.934, -11.510]
+[ 1.046, -0.026,  0.070;  0.031,  1.175, -0.072; -0.070, -0.073,  1.236]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3006_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3006_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3006_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.063566s
+trans (inverse) applied = [ 3.656,  6.936, -6.221]
+[ 1.011, -0.015,  0.060;  0.035,  1.030, -0.005; -0.066, -0.004,  1.049]
+reading output volume specification from mean_affine0.nii.gz
+backward resampling ...time consumed = 0.333
+Writing _aff.nii.gz ... Done in 0.305s
+Input affine transformation = [ 1.658,  5.369, -13.156]
+[ 1.062, -0.013, -0.014; -0.023,  1.119, -0.123;  0.011, -0.008,  1.175]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3007_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3007_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3007_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.06254s
+trans (inverse) applied = [ 4.818, 15.286, -7.303]
+[ 1.026, -0.008, -0.011; -0.017,  0.978, -0.051;  0.012,  0.050,  1.000]
+reading output volume specification from mean_affine0.nii.gz
+backward resampling ...time consumed = 0.347
+Writing _aff.nii.gz ... Done in 0.308s
+Input affine transformation = [-6.058, -0.968,  0.941]
+[ 1.094,  0.028, -0.002;  0.013,  1.126,  0.002; -0.031, -0.140,  1.186]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3009_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3009_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3009_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.063586s
+trans (inverse) applied = [-2.350,  9.755,  5.466]
+[ 1.057,  0.029,  0.001;  0.018,  0.990,  0.056; -0.030, -0.066,  1.003]
+reading output volume specification from mean_affine0.nii.gz
+backward resampling ...time consumed = 0.349
+Writing _aff.nii.gz ... Done in 0.308s
+inFile = inter_subjects_aff.txt
+outFile = mean_affine1.nii.gz
+type = ORIGINAL
+interpolation option is LEI
+subject 1 : sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.067351s
+subject 2 : sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.064668s
+Adding sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.005279s
+subject 3 : sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.062889s
+Adding sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add.nii.gz ... Done in 0.00534s
+subject 4 : sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.065794s
+Adding sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add.nii.gz ... Done in 0.005273s
+subject 5 : sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.066493s
+Adding sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add.nii.gz ... Done in 0.005319s
+subject 6 : sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.066127s
+Adding sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add_add.nii.gz ... Done in 0.005305s
+subject 7 : sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.062743s
+Adding sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add_add_add.nii.gz ... Done in 0.005338s
+subject 8 : sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.066169s
+Adding sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add_add_add_add.nii.gz ... Done in 0.005312s
+Voxelwise scaling sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add_add_add_add_add.nii.gz by 0.125 ... Done in 0.003892s
+Writing mean_affine1.nii.gz ... Done in 0.271408s
+Similarity = 317200
+dti_affine_population iteration 2
+Submitted batch job 149618
+Input affine transformation = [ 7.390,  6.399, -3.245]
+[ 0.972, -0.024,  0.095; -0.013,  1.112, -0.051; -0.072, -0.048,  1.150]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3001_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3001_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3001_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.075851s
+trans (inverse) applied = [13.872, 18.952,  3.405]
+[ 0.911, -0.012,  0.079; -0.008,  0.953,  0.013; -0.065,  0.015,  0.947]
+reading output volume specification from mean_affine1.nii.gz
+backward resampling ...time consumed = 0.442
+Writing _aff.nii.gz ... Done in 0.382s
+Input affine transformation = [-8.223, -14.984, -12.398]
+[ 1.111, -0.003,  0.043;  0.010,  1.213, -0.092; -0.037, -0.090,  1.284]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3002_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3002_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3002_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.0793s
+trans (inverse) applied = [-0.970, -1.372, -5.123]
+[ 1.042,  0.004,  0.038;  0.015,  1.038, -0.016; -0.032, -0.014,  1.055]
+reading output volume specification from mean_affine1.nii.gz
+backward resampling ...time consumed = 0.415
+Writing _aff.nii.gz ... Done in 0.306s
+Input affine transformation = [-2.600, -1.584, -3.650]
+[ 1.071,  0.030,  0.007; -0.030,  1.156,  0.002; -0.011, -0.113,  1.172]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3003_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3003_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3003_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.062558s
+trans (inverse) applied = [ 4.549, 11.726,  2.773]
+[ 1.005,  0.031,  0.009; -0.024,  0.993,  0.059; -0.008, -0.039,  0.961]
+reading output volume specification from mean_affine1.nii.gz
+backward resampling ...time consumed = 0.356
+Writing _aff.nii.gz ... Done in 0.308s
+Input affine transformation = [13.029,  2.905, -17.667]
+[ 1.039, -0.090, -0.005;  0.018,  1.155, -0.097;  0.023, -0.051,  1.175]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3004_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3004_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3004_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.062824s
+trans (inverse) applied = [18.497, 15.850, -10.288]
+[ 0.974, -0.073, -0.007;  0.021,  0.988, -0.023;  0.024,  0.014,  0.967]
+reading output volume specification from mean_affine1.nii.gz
+backward resampling ...time consumed = 0.344
+Writing _aff.nii.gz ... Done in 0.310s
+Input affine transformation = [ 9.149, -10.127, -15.658]
+[ 1.042, -0.062,  0.008;  0.048,  1.200, -0.071; -0.010, -0.074,  1.230]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3005_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3005_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3005_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.062177s
+trans (inverse) applied = [15.047,  3.708, -8.384]
+[ 0.977, -0.049,  0.005;  0.050,  1.028,  0.001; -0.007, -0.003,  1.012]
+reading output volume specification from mean_affine1.nii.gz
+backward resampling ...time consumed = 0.336
+Writing _aff.nii.gz ... Done in 0.308s
+Input affine transformation = [-3.392, -6.458, -13.680]
+[ 1.077, -0.027,  0.074;  0.034,  1.199, -0.076; -0.075, -0.075,  1.275]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3006_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3006_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3006_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.063995s
+trans (inverse) applied = [ 3.574,  7.244, -6.533]
+[ 1.010, -0.015,  0.062;  0.037,  1.027, -0.004; -0.068, -0.002,  1.048]
+reading output volume specification from mean_affine1.nii.gz
+backward resampling ...time consumed = 0.333
+Writing _aff.nii.gz ... Done in 0.307s
+Input affine transformation = [-1.388,  3.598, -16.464]
+[ 1.090, -0.011, -0.018; -0.024,  1.146, -0.137;  0.013, -0.005,  1.211]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3007_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3007_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3007_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.06308s
+trans (inverse) applied = [ 5.231, 15.908, -8.364]
+[ 1.022, -0.006, -0.013; -0.018,  0.978, -0.056;  0.014,  0.056,  0.999]
+reading output volume specification from mean_affine1.nii.gz
+backward resampling ...time consumed = 0.347
+Writing _aff.nii.gz ... Done in 0.307s
+Input affine transformation = [-9.770, -3.588, -1.937]
+[ 1.129,  0.026, -0.002;  0.013,  1.153, -0.002; -0.034, -0.140,  1.227]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3009_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3009_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3009_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.065163s
+trans (inverse) applied = [-2.358,  9.929,  4.388]
+[ 1.059,  0.027,  0.002;  0.017,  0.990,  0.055; -0.030, -0.060,  1.005]
+reading output volume specification from mean_affine1.nii.gz
+backward resampling ...time consumed = 0.347
+Writing _aff.nii.gz ... Done in 0.308s
+inFile = inter_subjects_aff.txt
+outFile = mean_affine2.nii.gz
+type = ORIGINAL
+interpolation option is LEI
+subject 1 : sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.062657s
+subject 2 : sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.064176s
+Adding sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.00528s
+subject 3 : sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.062015s
+Adding sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add.nii.gz ... Done in 0.005285s
+subject 4 : sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.065144s
+Adding sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add.nii.gz ... Done in 0.005973s
+subject 5 : sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.06547s
+Adding sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add.nii.gz ... Done in 0.00547s
+subject 6 : sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.062634s
+Adding sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add_add.nii.gz ... Done in 0.005342s
+subject 7 : sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.065231s
+Adding sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add_add_add.nii.gz ... Done in 0.005327s
+subject 8 : sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.062224s
+Adding sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add_add_add_add.nii.gz ... Done in 0.005223s
+Voxelwise scaling sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add_add_add_add_add.nii.gz by 0.125 ... Done in 0.003899s
+Writing mean_affine2.nii.gz ... Done in 0.256149s
+Similarity = 301379
+dti_affine_population iteration 3
+Submitted batch job 149626
+Input affine transformation = [ 4.151,  4.079, -5.678]
+[ 1.001, -0.025,  0.097; -0.011,  1.137, -0.058; -0.075, -0.049,  1.185]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3001_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3001_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3001_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.075308s
+trans (inverse) applied = [13.934, 19.003,  2.842]
+[ 0.912, -0.012,  0.079; -0.006,  0.953,  0.010; -0.065,  0.018,  0.945]
+reading output volume specification from mean_affine2.nii.gz
+backward resampling ...time consumed = 0.440
+Writing _aff.nii.gz ... Done in 0.385s
+Input affine transformation = [-11.865, -17.605, -14.835]
+[ 1.144, -0.005,  0.045;  0.011,  1.241, -0.097; -0.041, -0.094,  1.325]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3002_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3002_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3002_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.079918s
+trans (inverse) applied = [-0.899, -1.359, -5.453]
+[ 1.041,  0.003,  0.039;  0.015,  1.039, -0.015; -0.034, -0.013,  1.055]
+reading output volume specification from mean_affine2.nii.gz
+backward resampling ...time consumed = 0.414
+Writing _aff.nii.gz ... Done in 0.305s
+Input affine transformation = [-6.311, -3.740, -6.413]
+[ 1.105,  0.030,  0.007; -0.031,  1.182, -0.004; -0.013, -0.114,  1.210]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3003_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3003_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3003_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.062186s
+trans (inverse) applied = [ 4.445, 12.066,  2.005]
+[ 1.006,  0.030,  0.010; -0.023,  0.993,  0.056; -0.009, -0.035,  0.962]
+reading output volume specification from mean_affine2.nii.gz
+backward resampling ...time consumed = 0.355
+Writing _aff.nii.gz ... Done in 0.308s
+Input affine transformation = [10.063,  0.652, -20.486]
+[ 1.071, -0.095, -0.006;  0.020,  1.181, -0.107;  0.023, -0.052,  1.213]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3004_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3004_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3004_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.061538s
+trans (inverse) applied = [18.698, 16.069, -10.878]
+[ 0.975, -0.075, -0.007;  0.023,  0.988, -0.026;  0.024,  0.017,  0.967]
+reading output volume specification from mean_affine2.nii.gz
+backward resampling ...time consumed = 0.343
+Writing _aff.nii.gz ... Done in 0.309s
+Input affine transformation = [ 6.058, -13.173, -17.805]
+[ 1.074, -0.067,  0.008;  0.054,  1.226, -0.073; -0.013, -0.082,  1.272]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3005_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3005_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3005_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.063108s
+trans (inverse) applied = [15.221,  3.451, -8.445]
+[ 0.978, -0.051,  0.006;  0.054,  1.027,  0.003; -0.009, -0.006,  1.013]
+reading output volume specification from mean_affine2.nii.gz
+backward resampling ...time consumed = 0.335
+Writing _aff.nii.gz ... Done in 0.305s
+Input affine transformation = [-7.111, -8.885, -16.336]
+[ 1.110, -0.028,  0.076;  0.036,  1.227, -0.085; -0.077, -0.077,  1.315]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3006_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3006_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3006_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.063814s
+trans (inverse) applied = [ 3.475,  7.491, -7.154]
+[ 1.010, -0.015,  0.062;  0.038,  1.028, -0.007; -0.067,  0.000,  1.047]
+reading output volume specification from mean_affine2.nii.gz
+backward resampling ...time consumed = 0.333
+Writing _aff.nii.gz ... Done in 0.307s
+Input affine transformation = [-4.726,  1.799, -19.501]
+[ 1.121, -0.013, -0.017; -0.025,  1.172, -0.150;  0.011, -0.004,  1.252]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3007_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3007_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3007_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.063477s
+trans (inverse) applied = [ 5.391, 16.325, -9.011]
+[ 1.021, -0.007, -0.012; -0.018,  0.978, -0.061;  0.014,  0.060,  1.001]
+reading output volume specification from mean_affine2.nii.gz
+backward resampling ...time consumed = 0.345
+Writing _aff.nii.gz ... Done in 0.307s
+Input affine transformation = [-13.204, -5.771, -4.328]
+[ 1.163,  0.023, -0.002;  0.013,  1.177, -0.009; -0.037, -0.144,  1.266]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3009_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3009_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3009_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.063769s
+trans (inverse) applied = [-2.070, 10.348,  3.916]
+[ 1.059,  0.025,  0.002;  0.017,  0.989,  0.052; -0.031, -0.058,  1.005]
+reading output volume specification from mean_affine2.nii.gz
+backward resampling ...time consumed = 0.346
+Writing _aff.nii.gz ... Done in 0.307s
+inFile = inter_subjects_aff.txt
+outFile = mean_affine3.nii.gz
+type = ORIGINAL
+interpolation option is LEI
+subject 1 : sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.062229s
+subject 2 : sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.065979s
+Adding sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.005389s
+subject 3 : sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.062197s
+Adding sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add.nii.gz ... Done in 0.005363s
+subject 4 : sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.064851s
+Adding sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add.nii.gz ... Done in 0.005364s
+subject 5 : sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.064405s
+Adding sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add.nii.gz ... Done in 0.005404s
+subject 6 : sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.065789s
+Adding sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add_add.nii.gz ... Done in 0.005284s
+subject 7 : sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.064848s
+Adding sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add_add_add.nii.gz ... Done in 0.005346s
+subject 8 : sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.065323s
+Adding sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add_add_add_add.nii.gz ... Done in 0.005331s
+Voxelwise scaling sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add_add_add_add_add.nii.gz by 0.125 ... Done in 0.003932s
+Writing mean_affine3.nii.gz ... Done in 0.248159s
+Similarity = 272681
+dti_affine_population iteration 4
+Submitted batch job 149635
+Input affine transformation = [ 0.526,  2.148, -8.154]
+[ 1.033, -0.029,  0.102; -0.013,  1.163, -0.068; -0.080, -0.049,  1.225]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3001_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3001_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3001_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.07648s
+trans (inverse) applied = [13.724, 19.386,  2.328]
+[ 0.913, -0.014,  0.081; -0.006,  0.954,  0.007; -0.067,  0.021,  0.946]
+reading output volume specification from mean_affine3.nii.gz
+backward resampling ...time consumed = 0.440
+Writing _aff.nii.gz ... Done in 0.382s
+Input affine transformation = [-15.632, -19.862, -17.283]
+[ 1.178, -0.007,  0.048;  0.011,  1.268, -0.104; -0.044, -0.100,  1.369]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3002_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3002_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3002_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.079021s
+trans (inverse) applied = [-0.869, -1.055, -5.714]
+[ 1.041,  0.002,  0.041;  0.016,  1.039, -0.016; -0.035, -0.013,  1.056]
+reading output volume specification from mean_affine3.nii.gz
+backward resampling ...time consumed = 0.415
+Writing _aff.nii.gz ... Done in 0.305s
+Input affine transformation = [-9.574, -6.330, -8.941]
+[ 1.136,  0.028,  0.007; -0.030,  1.208, -0.009; -0.014, -0.116,  1.247]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3003_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3003_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3003_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.06319s
+trans (inverse) applied = [ 4.810, 11.972,  1.540]
+[ 1.004,  0.029,  0.010; -0.021,  0.993,  0.054; -0.009, -0.032,  0.961]
+reading output volume specification from mean_affine3.nii.gz
+backward resampling ...time consumed = 0.354
+Writing _aff.nii.gz ... Done in 0.310s
+Input affine transformation = [ 6.913, -1.767, -23.234]
+[ 1.103, -0.099, -0.005;  0.022,  1.207, -0.115;  0.022, -0.054,  1.252]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3004_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3004_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3004_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.061591s
+trans (inverse) applied = [18.802, 16.111, -11.317]
+[ 0.974, -0.076, -0.005;  0.025,  0.988, -0.028;  0.023,  0.019,  0.967]
+reading output volume specification from mean_affine3.nii.gz
+backward resampling ...time consumed = 0.343
+Writing _aff.nii.gz ... Done in 0.308s
+Input affine transformation = [ 2.765, -16.033, -20.302]
+[ 1.107, -0.071,  0.010;  0.057,  1.253, -0.077; -0.016, -0.087,  1.313]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3005_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3005_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3005_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.062728s
+trans (inverse) applied = [15.283,  3.363, -8.737]
+[ 0.978, -0.053,  0.007;  0.056,  1.028,  0.004; -0.010, -0.005,  1.013]
+reading output volume specification from mean_affine3.nii.gz
+backward resampling ...time consumed = 0.336
+Writing _aff.nii.gz ... Done in 0.307s
+Input affine transformation = [-10.643, -11.441, -18.730]
+[ 1.144, -0.032,  0.078;  0.038,  1.254, -0.092; -0.082, -0.081,  1.357]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3006_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3006_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3006_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.063632s
+trans (inverse) applied = [ 3.614,  7.590, -7.449]
+[ 1.011, -0.017,  0.063;  0.039,  1.028, -0.007; -0.068,  0.002,  1.047]
+reading output volume specification from mean_affine3.nii.gz
+backward resampling ...time consumed = 0.332
+Writing _aff.nii.gz ... Done in 0.305s
+Input affine transformation = [-8.209,  0.130, -22.492]
+[ 1.156, -0.015, -0.019; -0.025,  1.198, -0.164;  0.011, -0.003,  1.290]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3007_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3007_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3007_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.06315s
+trans (inverse) applied = [ 5.483, 16.800, -9.532]
+[ 1.021, -0.008, -0.012; -0.017,  0.977, -0.066;  0.013,  0.063,  0.999]
+reading output volume specification from mean_affine3.nii.gz
+backward resampling ...time consumed = 0.346
+Writing _aff.nii.gz ... Done in 0.307s
+Input affine transformation = [-17.143, -8.314, -6.782]
+[ 1.198,  0.023, -0.001;  0.016,  1.203, -0.015; -0.040, -0.148,  1.307]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3009_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3009_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3009_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.06368s
+trans (inverse) applied = [-2.155, 10.410,  3.473]
+[ 1.059,  0.025,  0.004;  0.020,  0.989,  0.049; -0.032, -0.056,  1.005]
+reading output volume specification from mean_affine3.nii.gz
+backward resampling ...time consumed = 0.346
+Writing _aff.nii.gz ... Done in 0.308s
+inFile = inter_subjects_aff.txt
+outFile = mean_affine4.nii.gz
+type = ORIGINAL
+interpolation option is LEI
+subject 1 : sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.061922s
+subject 2 : sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.062377s
+Adding sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.005353s
+subject 3 : sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.060913s
+Adding sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add.nii.gz ... Done in 0.005423s
+subject 4 : sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.061251s
+Adding sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add.nii.gz ... Done in 0.00527s
+subject 5 : sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.064131s
+Adding sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add.nii.gz ... Done in 0.005728s
+subject 6 : sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.064601s
+Adding sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add_add.nii.gz ... Done in 0.00529s
+subject 7 : sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.064179s
+Adding sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add_add_add.nii.gz ... Done in 0.005828s
+subject 8 : sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.065941s
+Adding sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add_add_add_add.nii.gz ... Done in 0.005338s
+Voxelwise scaling sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add_add_add_add_add.nii.gz by 0.125 ... Done in 0.003892s
+Writing mean_affine4.nii.gz ... Done in 0.239188s
+Similarity = 250997
+dti_affine_population iteration 5
+Submitted batch job 149643
+Input affine transformation = [-2.905,  0.094, -10.782]
+[ 1.065, -0.031,  0.104; -0.011,  1.187, -0.078; -0.083, -0.048,  1.260]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3001_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3001_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3001_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.075812s
+trans (inverse) applied = [13.879, 19.733,  1.596]
+[ 0.912, -0.014,  0.080; -0.003,  0.952,  0.002; -0.067,  0.026,  0.945]
+reading output volume specification from mean_affine4.nii.gz
+backward resampling ...time consumed = 0.440
+Writing _aff.nii.gz ... Done in 0.385s
+Input affine transformation = [-19.490, -22.479, -19.604]
+[ 1.214, -0.009,  0.050;  0.012,  1.299, -0.113; -0.048, -0.105,  1.410]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3002_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3002_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3002_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.079291s
+trans (inverse) applied = [-0.696, -0.947, -5.969]
+[ 1.040,  0.001,  0.041;  0.016,  1.040, -0.018; -0.036, -0.012,  1.055]
+reading output volume specification from mean_affine4.nii.gz
+backward resampling ...time consumed = 0.414
+Writing _aff.nii.gz ... Done in 0.307s
+Input affine transformation = [-13.778, -8.593, -11.070]
+[ 1.174,  0.028,  0.008; -0.033,  1.236, -0.014; -0.016, -0.123,  1.285]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3003_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3003_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3003_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.06216s
+trans (inverse) applied = [ 4.570, 12.296,  1.307]
+[ 1.005,  0.029,  0.012; -0.022,  0.994,  0.053; -0.010, -0.033,  0.960]
+reading output volume specification from mean_affine4.nii.gz
+backward resampling ...time consumed = 0.355
+Writing _aff.nii.gz ... Done in 0.308s
+Input affine transformation = [ 3.794, -3.994, -26.010]
+[ 1.138, -0.106, -0.006;  0.024,  1.234, -0.125;  0.021, -0.055,  1.290]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3004_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3004_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3004_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.062795s
+trans (inverse) applied = [19.121, 16.442, -11.851]
+[ 0.974, -0.080, -0.006;  0.026,  0.987, -0.031;  0.022,  0.022,  0.967]
+reading output volume specification from mean_affine4.nii.gz
+backward resampling ...time consumed = 0.343
+Writing _aff.nii.gz ... Done in 0.312s
+Input affine transformation = [-0.584, -18.879, -22.778]
+[ 1.141, -0.076,  0.011;  0.061,  1.281, -0.084; -0.017, -0.092,  1.354]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3005_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3005_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3005_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.063335s
+trans (inverse) applied = [15.500,  3.415, -9.103]
+[ 0.977, -0.055,  0.008;  0.058,  1.027,  0.003; -0.010, -0.005,  1.014]
+reading output volume specification from mean_affine4.nii.gz
+backward resampling ...time consumed = 0.335
+Writing _aff.nii.gz ... Done in 0.306s
+Input affine transformation = [-14.585, -13.934, -21.227]
+[ 1.179, -0.034,  0.082;  0.041,  1.281, -0.101; -0.087, -0.084,  1.399]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3006_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3006_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3006_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.063784s
+trans (inverse) applied = [ 3.614,  7.863, -7.944]
+[ 1.010, -0.018,  0.064;  0.041,  1.027, -0.010; -0.070,  0.004,  1.048]
+reading output volume specification from mean_affine4.nii.gz
+backward resampling ...time consumed = 0.332
+Writing _aff.nii.gz ... Done in 0.307s
+Input affine transformation = [-12.046, -1.727, -25.786]
+[ 1.193, -0.017, -0.020; -0.025,  1.224, -0.175;  0.011, -0.000,  1.329]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3007_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3007_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3007_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.064303s
+trans (inverse) applied = [ 5.488, 17.214, -10.380]
+[ 1.021, -0.009, -0.012; -0.016,  0.976, -0.069;  0.014,  0.068,  0.999]
+reading output volume specification from mean_affine4.nii.gz
+backward resampling ...time consumed = 0.346
+Writing _aff.nii.gz ... Done in 0.310s
+Input affine transformation = [-21.343, -10.932, -9.420]
+[ 1.237,  0.022, -0.000;  0.016,  1.231, -0.021; -0.044, -0.150,  1.349]
+Compose the input transformation with average_inv.aff ...
+Saving the output transformation as sub-3009_space-dwi_desc-preproc-b1000_dtitk.aff
+inFile = sub-3009_space-dwi_desc-preproc-b1000_dtitk.nii.gz
+outFile = _aff.nii.gz
+interpolation option is LEI
+reorientOption = PPD
+Reading sub-3009_space-dwi_desc-preproc-b1000_dtitk.nii.gz ... Done in 0.069165s
+trans (inverse) applied = [-2.233, 10.529,  2.782]
+[ 1.059,  0.024,  0.005;  0.020,  0.990,  0.048; -0.034, -0.051,  1.006]
+reading output volume specification from mean_affine4.nii.gz
+backward resampling ...time consumed = 0.346
+Writing _aff.nii.gz ... Done in 0.310s
+inFile = inter_subjects_aff.txt
+outFile = mean_affine5.nii.gz
+type = ORIGINAL
+interpolation option is LEI
+subject 1 : sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.066544s
+subject 2 : sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.067282s
+Adding sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.007924s
+subject 3 : sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.06324s
+Adding sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add.nii.gz ... Done in 0.005389s
+subject 4 : sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.060941s
+Adding sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add.nii.gz ... Done in 0.005455s
+subject 5 : sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.063184s
+Adding sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add.nii.gz ... Done in 0.005392s
+subject 6 : sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.063629s
+Adding sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add_add.nii.gz ... Done in 0.00524s
+subject 7 : sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.063359s
+Adding sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add_add_add.nii.gz ... Done in 0.005292s
+subject 8 : sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz
+Reading sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz ... Done in 0.060931s
+Adding sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add_add_add_add.nii.gz ... Done in 0.005325s
+Voxelwise scaling sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_add_add_add_add_add_add_add.nii.gz by 0.125 ... Done in 0.003943s
+Writing mean_affine5.nii.gz ... Done in 0.231035s
+Similarity = 236181
+Creating binary mask of mean_affine template
+Reading mean_affine5.nii.gz ... Done in 0.064613s
+Computing the tensor trace (mean diffusion) map ... Done in 0.003326s
+Writing mean_affine5_tr.nii.gz ... Done in 0.039263s
+running on host: luna-02
+command: /scratch/anw/cvriend/gitrepo/DTITK_template-diffvalues/2d-DTITK_interreg-diffeo.sh /home/anw/cvriend/my-scratch/dwi-dtitk5/interreg /scratch/anw/cvriend/gitrepo/DTITK_template-diffvalues mean_affine5.nii.gz mask.nii.gz inter_subjects_aff.txt 7
+
+dti_diffeomorphic_population_initial iteration 1
+Submitted batch job 149651
+update template
+inFile = inter_subjects_aff_diffeo.txt
+outFile = mean_diffeomorphic_initial1.nii.gz
+type = ORIGINAL
+interpolation option is LEI
+subject 1 : sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz
+Reading sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz ... Done in 0.092612s
+subject 2 : sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz
+Reading sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz ... Done in 0.091694s
+Adding sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz ... Done in 0.006239s
+subject 3 : sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz
+Reading sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz ... Done in 0.084138s
+Adding sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo_add.nii.gz ... Done in 0.008179s
+subject 4 : sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz
+Reading sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz ... Done in 0.085174s
+Adding sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo_add_add.nii.gz ... Done in 0.006225s
+subject 5 : sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz
+Reading sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz ... Done in 0.084053s
+Adding sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo_add_add_add.nii.gz ... Done in 0.00629s
+subject 6 : sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz
+Reading sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz ... Done in 0.083982s
+Adding sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo_add_add_add_add.nii.gz ... Done in 0.007464s
+subject 7 : sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz
+Reading sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz ... Done in 0.085204s
+Adding sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo_add_add_add_add_add.nii.gz ... Done in 0.006057s
+subject 8 : sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz
+Reading sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz ... Done in 0.06883s
+Adding sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo_add_add_add_add_add_add.nii.gz ... Done in 0.005339s
+Voxelwise scaling sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo_add_add_add_add_add_add_add.nii.gz by 0.125 ... Done in 0.003898s
+Writing mean_diffeomorphic_initial1.nii.gz ... Done in 0.258914s
+inFile = diffeo.txt
+outFile = mean_df.nii.gz
+subject 1 : sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz
+Reading sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz ... Done in 0.455755s
+subject 2 : sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz
+Reading sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz ... Done in 0.428327s
+Adding sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz ... Done in 0.024221s
+subject 3 : sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz
+Reading sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz ... Done in 0.431512s
+Adding sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df_add.nii.gz ... Done in 0.02303s
+subject 4 : sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz
+Reading sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz ... Done in 0.430071s
+Adding sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df_add_add.nii.gz ... Done in 0.023256s
+subject 5 : sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz
+Reading sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz ... Done in 0.429448s
+Adding sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df_add_add_add.nii.gz ... Done in 0.023312s
+subject 6 : sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz
+Reading sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz ... Done in 0.429809s
+Adding sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df_add_add_add_add.nii.gz ... Done in 0.023111s
+subject 7 : sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz
+Reading sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz ... Done in 0.429921s
+Adding sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df_add_add_add_add_add.nii.gz ... Done in 0.023128s
+subject 8 : sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz
+Reading sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz ... Done in 0.427796s
+Adding sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df_add_add_add_add_add_add.nii.gz ... Done in 0.023205s
+Voxelwise scaling sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df_add_add_add_add_add_add_add.nii.gz by 0.125 ... Done in 0.018798s
+Writing mean_df.nii.gz ... Done in 3.49359s
+inFile = mean_df.nii.gz
+Reading mean_df.nii.gz ... Done in 0.437786s
+outFile = mean_df_inv.nii.gz
+Writing mean_df_inv.nii.gz ... Done in 3.49478s
+inFile = mean_diffeomorphic_initial1.nii.gz
+outFile = mean_diffeomorphic_initial1.nii.gz
+transFile = mean_df_inv.nii.gz
+df option is FD
+interpolation option is LEI
+reorientOption = PPD
+Reading mean_diffeomorphic_initial1.nii.gz ... Done in 0.063395s
+Reading mean_df_inv.nii.gz ... Done in 0.450529s
+backward resampling ...time consumed = 1.59853
+Writing mean_diffeomorphic_initial1.nii.gz ... Done in 0.551843s
+dti_diffeomorphic_population_initial iteration 2
+Submitted batch job 149659
+update template
+inFile = inter_subjects_aff_diffeo.txt
+outFile = mean_diffeomorphic_initial2.nii.gz
+type = ORIGINAL
+interpolation option is LEI
+subject 1 : sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz
+Reading sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz ... Done in 0.092254s
+subject 2 : sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz
+Reading sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz ... Done in 0.091294s
+Adding sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz ... Done in 0.006326s
+subject 3 : sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz
+Reading sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz ... Done in 0.084131s
+Adding sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo_add.nii.gz ... Done in 0.006302s
+subject 4 : sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz
+Reading sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz ... Done in 0.08536s
+Adding sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo_add_add.nii.gz ... Done in 0.006321s
+subject 5 : sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz
+Reading sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz ... Done in 0.083769s
+Adding sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo_add_add_add.nii.gz ... Done in 0.009583s
+subject 6 : sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz
+Reading sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz ... Done in 0.084718s
+Adding sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo_add_add_add_add.nii.gz ... Done in 0.006376s
+subject 7 : sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz
+Reading sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz ... Done in 0.084008s
+Adding sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo_add_add_add_add_add.nii.gz ... Done in 0.005364s
+subject 8 : sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz
+Reading sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz ... Done in 0.069003s
+Adding sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo_add_add_add_add_add_add.nii.gz ... Done in 0.005534s
+Voxelwise scaling sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo_add_add_add_add_add_add_add.nii.gz by 0.125 ... Done in 0.004084s
+Writing mean_diffeomorphic_initial2.nii.gz ... Done in 0.258995s
+inFile = diffeo.txt
+outFile = mean_df.nii.gz
+subject 1 : sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz
+Reading sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz ... Done in 0.454407s
+subject 2 : sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz
+Reading sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz ... Done in 0.445329s
+Adding sub-3002_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz ... Done in 0.0233s
+subject 3 : sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz
+Reading sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz ... Done in 0.429066s
+Adding sub-3003_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df_add.nii.gz ... Done in 0.023085s
+subject 4 : sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz
+Reading sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz ... Done in 0.428858s
+Adding sub-3004_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df_add_add.nii.gz ... Done in 0.023037s
+subject 5 : sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz
+Reading sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz ... Done in 0.433537s
+Adding sub-3005_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df_add_add_add.nii.gz ... Done in 0.023053s
+subject 6 : sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz
+Reading sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz ... Done in 0.431083s
+Adding sub-3006_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df_add_add_add_add.nii.gz ... Done in 0.023114s
+subject 7 : sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz
+Reading sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz ... Done in 0.432418s
+Adding sub-3007_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df_add_add_add_add_add.nii.gz ... Done in 0.023016s
+subject 8 : sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz
+Reading sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz ... Done in 0.429662s
+Adding sub-3009_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df.nii.gz to sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df_add_add_add_add_add_add.nii.gz ... Done in 0.023183s
+Voxelwise scaling sub-3001_space-dwi_desc-preproc-b1000_dtitk_aff_diffeo.df_add_add_add_add_add_add_add.nii.gz by 0.125 ... Done in 0.018728s
+Writing mean_df.nii.gz ... Done in 3.55068s
+inFile = mean_df.nii.gz
+Reading mean_df.nii.gz ... Done in 0.437501s
+outFile = mean_df_inv.nii.gz
+Writing mean_df_inv.nii.gz ... Done in 3.35785s
+inFile = mean_diffeomorphic_initial2.nii.gz
+outFile = mean_diffeomorphic_initial2.nii.gz
+transFile = mean_df_inv.nii.gz
+df option is FD
+interpolation option is LEI
+reorientOption = PPD
+Reading mean_diffeomorphic_initial2.nii.gz ... Done in 0.062986s
+Reading mean_df_inv.nii.gz ... Done in 0.437015s
+backward resampling ...time consumed = 1.59973
+Writing mean_diffeomorphic_initial2.nii.gz ... Done in 0.551379s
+dti_diffeomorphic_population_initial iteration 3
+Submitted batch job 149668

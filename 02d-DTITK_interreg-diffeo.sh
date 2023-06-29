@@ -29,18 +29,17 @@ EOF
 # Setup relevant software and variables
 #########################################
 module load dtitk/2.3.1
-module load fsl/6.0.5.1
+module load fsl/6.0.6.5
 
 . ${DTITK_ROOT}/scripts/dtitk_common.sh
 
 # Sets up variables for folder with tensor images from all subjects
-headdir=${1}
-workdir=${headdir}/interreg
-scriptdir=${headdir}/scripts
-template=${2} # mean_affine${Niter}.nii.gz
-mask=${3}     # mask.nii.gz
-subjects=${4} # inter_subjects_aff.txt
-simul=${5}
+workdir=${1}
+scriptdir=${2}
+template=${3} # mean_affine${Niter}.nii.gz
+mask=${4}     # mask.nii.gz
+subjects=${5} # inter_subjects_aff.txt
+simul=${6}
 
 mkdir -p ${workdir}/QC
 

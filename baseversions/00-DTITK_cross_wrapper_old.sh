@@ -56,12 +56,12 @@ simul=2 # number of subjects to process simultaneously
 Niter=5 # number of iteratiosn for affine registration to template (default = 5)
 bshell=1000
 cd ${preprocdir}
-nsubj=$(ls -d sub-300?/ | wc -l)
-ls -d sub-300?/ | sed 's:/.*::' > subjects.txt
+nsubj=$(ls -d sub-TIPICCO00?/ | wc -l)
+ls -d sub-TIPICCO00?/ | sed 's:/.*::' > subjects.txt
 cd ${workdir}
 
 # split DWI scans, extract b1000, make DTITK compatible and perform intra-subject registration
-sbatch --wait --array="1-${nsubj}%${simul}" ${scriptdir}/01-DTITK_cross_fit.sh ${preprocdir} ${workdir} ${preprocdir}/subjects.txt
+sbatch --wait --array="1-${nsubj}%${simul}" ${scriptdir}/01-DTITK_fit+intrareg.sh ${preprocdir} ${workdir} ${preprocdir}/subjects.txt
 mkdir -p ${workdir}/logs
 mv 1-DTITK*.log ${workdir}/logs
 ##########################################################################################
@@ -117,11 +117,14 @@ cd ${workdir}/interreg
 ls -1 sub-*_aff.nii.gz >inter_subjects_aff.txt
 mv *.log ./logs
 # perform diffeomorphic inter-subject registration to make diffeo template
-${scriptdir}/2d-DTITK_interreg-diffeo.sh ${workdir} mean_affine${Niter}.nii.gz mask.nii.gz \
+${scriptdir}/2d-DTITK_interreg-diffeo.sh ${workdir}/interreg ${scriptdir} mean_affine${Niter}.nii.gz mask.nii.gz \
     inter_subjects_aff.txt ${simul}
 
 #############################################################################################
 # warp images to template
+
+
+# needs complete revision!!
 
 # warp dtitk files from subject space to group template
 ${scriptdir}/03-DTITK_warp2template.sh ${workdir}

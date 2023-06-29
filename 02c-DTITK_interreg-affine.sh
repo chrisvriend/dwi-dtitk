@@ -21,14 +21,14 @@ EOF
     exit 1
 }
 
-[ _$4 = _ ] && Usage
+[ _$5 = _ ] && Usage
 
 
 #########################################
 # Setup relevant software and variables
 #########################################
 module load dtitk/2.3.1
-module load fsl/6.0.5.1
+module load fsl/6.0.6.5
 
 . ${DTITK_ROOT}/scripts/dtitk_common.sh
 
