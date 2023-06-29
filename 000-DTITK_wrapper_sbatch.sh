@@ -156,8 +156,9 @@ cd ${workdir}
 ${scriptdir}/007-DTITK_extract-diffvalues.sh ${workdir} ${workdir}/tracts/tractfile.txt ${scriptdir}
 
 ###########################################################################################
-# create output
+# write to output directory
 
+${scriptdir}/008-DTITK_write-output.sh ${workdir} ${outputdir}
 
 #############
 ### DONE ####
