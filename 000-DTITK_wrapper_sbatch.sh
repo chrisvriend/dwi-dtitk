@@ -57,12 +57,11 @@
 Usage() {
     cat <<EOF
 
-    (C) C.Vriend - 2/3/2023 - 00-DTITK_long_wrapper_sbatch.sh
+    (C) C.Vriend - 2/3/2023 - 000-DTITK_wrapper_sbatch.sh
 	Wrapper script to perform all steps from splitting the eddy-corrected DWI data
-    to b1000 shell, perform intra and inter-person registration.
-    THIS SCRIPT IS FOR SAMPLES WITH LONGITUDINAL DATA (I.E. >2 TIMEPOINTS)
+    to a single shell, perform intra and inter-person registration.
 
-    Usage: ./00-DTITK_long_wrapper_sbatch.sh workdir
+    Usage: ./000-DTITK_wrapper_sbatch.sh preprocdir workdir outputdir
     Obligatory: 
     preprocdir = full path to dwi preprocessed (e.g. eddy) output (e.g. /derivatives/dwi-preproc)
     workdir = full path to (head) working directory directory where all files will be processed, 
@@ -110,6 +109,7 @@ ${scriptdir}/01b-DTITK_checkfit.sh ${workdir}
 ############################################################################################
 # inter-subject registration steps
 
+if [ -z ${templatedir} ]; then 
 # prepare for inter-subject registration by making a new folder and symbolic links
 ${scriptdir}/02a-DTITK_prepinterreg.sh ${workdir}
 
@@ -124,14 +124,19 @@ cd ${workdir}/interreg ; mv *.log ./logs ; ls -1 sub-*_aff.nii.gz >inter_subject
 # perform diffeomorphic inter-subject registration to make diffeo template
 ${scriptdir}/02d-DTITK_interreg-diffeo.sh ${workdir}/interreg ${scriptdir} mean_affine${Niter}.nii.gz mask.nii.gz inter_subjects_aff.txt ${simul}
 
-#############################################################################################
-# warp images to template
-
 # warp dtitk files from subject space to group template for each timepoint
 ${scriptdir}/03a-DTITK_warp2template.sh ${workdir} ${bshell}
 
+else 
+echo "using existing template in ${templatedir}"
+${scriptdir}/03z-DTITK_reg-warp2template.sh ${workdir} ${templatedir} ${bshell}
+
+fi 
+
+
 # make QC figures of warped scans
 ${scriptdir}/03b-DTITK_warpqc.sh ${workdir}/warps
+#############################################################################################
 
 # extract diffusion/NODDI maps
 ${scriptdir}/004-DTITK_makediffmaps.sh ${workdir} ${bshell}

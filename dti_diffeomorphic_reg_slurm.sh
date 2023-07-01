@@ -29,6 +29,12 @@ ftol=${6}
 
 subj=$(sed "${SLURM_ARRAY_TASK_ID}q;d" ${subjects})
 
+# random delay
+duration=$((RANDOM % 20 + 2))
+echo "INITIALIZING..."
+sleep ${duration}
+
+
 # Deformable alignment of a DTI volume (the subject) to a DTI template
 #Usage: dti_diffeomorphic_reg template subject mask initial no_of_iter ftol
 dti_diffeomorphic_reg ${template} ${subj} ${mask} ${initial} ${no_of_iter} ${ftol}

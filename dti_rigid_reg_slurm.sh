@@ -22,13 +22,21 @@ sep_coarse=$(echo ${lengthscale}*4 | bc -l)
 sep_fine=$(echo ${lengthscale}*2 | bc -l)
 smoption=EDS
 
-subjects=${2}
-subj=$(sed "${SLURM_ARRAY_TASK_ID}q;d" ${subjects})
-
 template=${1}
+subjects=${2}
 ftol=${3}
 useInTrans=${4}
 coarse=${5}
+
+
+subj=$(sed "${SLURM_ARRAY_TASK_ID}q;d" ${subjects})
+
+
+# random delay
+duration=$((RANDOM % 20 + 2))
+echo "INITIALIZING..."
+sleep ${duration}
+
 
 #Usage: dti_rigid_reg template subject SMOption xsep ysep zsep ftol [useInTrans]
 if test ${coarse} -eq 1; then 
