@@ -45,7 +45,6 @@ bshell=1000
 
 QCdir=${workdir}/QC
 mkdir -p ${QCdir}
-cd ${bidsdir}
 subj=$(sed "${SLURM_ARRAY_TASK_ID}q;d" ${subjects})
 # random delay
 duration=$((RANDOM % 40 + 2))

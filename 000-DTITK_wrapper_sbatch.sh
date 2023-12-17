@@ -97,7 +97,7 @@ nsubj=$(cat subjects.txt | wc -l)
 mkdir -p ${workdir}
 cd ${workdir}
 # split DWI scans, extract b1000, make DTITK compatible and perform intra-subject registration
-sbatch --wait --array="01a-${nsubj}%${simul}" ${scriptdir}/01-DTITK_fit+intrareg.sh ${preprocdir} ${workdir} ${preprocdir}/subjects.txt
+sbatch --wait --array="1-${nsubj}%${simul}" ${scriptdir}/01-DTITK_fit+intrareg.sh ${preprocdir} ${workdir} ${preprocdir}/subjects.txt
 mkdir -p ${workdir}/logs
 mv 1-DTITK*.log ${workdir}/logs
 ##########################################################################################
