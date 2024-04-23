@@ -59,7 +59,7 @@ conda activate /scratch/anw/share/python-env/mrtrix
 module load dtitk/2.3.1
 module load fsl/6.0.6.5
 module load ANTs/2.4.1
-synthstrip=/data/anw/anw-gold/NP/doorgeefluik/container_apps/synthstrip.1.2.sif
+synthstrip=/scratch/anw/share-np/fmridenoiser/synthstrip.1.2.sif
 ixitemplate=/data/anw/anw-gold/NP/doorgeefluik/ixi_aging_template_v3.0/template
 
 ###

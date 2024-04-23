@@ -37,7 +37,7 @@ threads=16
 
 # source software
 module load fsl/6.0.6.5
-module load ANTs/2.4.1
+module load ANTs/2.5.1
 
 workdir=${1}
 labelfile=${2}
