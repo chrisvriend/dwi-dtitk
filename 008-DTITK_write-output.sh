@@ -31,7 +31,7 @@ cd ${workdir}
 # perform some checks before transfering files.
 if [ ! -f ${workdir}/diffmaps/mean_final_high_res.nii.gz ] \
 || [ ! -f ${workdir}/diffmaps/all_FA.nii.gz ] \
-|| [ ! -f ${workdir}/ICBM2FAWarped.nii.gz ] \ 
+|| [ ! -f ${workdir}/diffmaps/ICBM2FAWarped.nii.gz ] \ 
 || [ ! -f ${workdir}/tracts/JHU-ICBM-labels_templatespace.nii.gz ] \
 || (($(ls -1 ${workdir}/diffvalues/*.csv | wc -l ) < 1 )); then 
 echo
@@ -42,7 +42,7 @@ fi
 
 for subj in $(ls -d sub-*); do
 
-    for dwidir in ${preprocdir}/${subj}/{,ses*/}dwi; do
+    for dwidir in ${workdir}/${subj}/{,ses*/}dwi; do
         if [ ! -d ${dwidir} ]; then
             continue
         fi
