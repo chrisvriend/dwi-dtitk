@@ -58,16 +58,15 @@ for subj in $(ls -d sub-*); do
         fi
 
         mkdir -p ${outputdir}/${subj}${sessionpath}
-        for fold in xfms tbss dtitk figures; do
+        for fold in xfms dtitk figures; do
             mkdir -p ${outputdir}/${subj}${sessionpath}/${fold}
         done
-        rsync -a ${workdir}/diffmaps/${subj}${sessionfile}space-template_desc*_dtitk.nii.gz ${outputdir}/${subj}${sessionpath}tbss
+        rsync -a ${workdir}/diffmaps/${subj}${sessionfile}space-template_desc*_dtitk.nii.gz ${outputdir}/${subj}${sessionpath}dtitk
         rsync -a ${workdir}/diffvalues/${subj}${sessionfile}diffvalues.csv ${outputdir}/${subj}${sessionpath}dtitk
         rsync -a ${workdir}/warps/${subj}${sessionfile}dwi-2-dtitktemplate.df.nii.gz ${outputdir}/${subj}${sessionpath}xfms
-        rsync -a ${workdir}/warps/${subj}${sessionfile}space-template_desc-b${bshell}_res*_dtitk.nii.gz \
-            ${outputdir}/${subj}${sessionpath}dtitk
         rsync -a ${workdir}/${subj}${sessionpath}figures/*.png ${workdir}/warps/QC/${subj}${sessionfile}overlay.png \
             ${workdir}/interreg/QC/${subj}*.png ${outputdir}/${subj}${sessionpath}figures
+
 
     done
 
