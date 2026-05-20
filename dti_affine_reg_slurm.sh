@@ -47,6 +47,9 @@ source "${scriptdir}/config.sh"
 # load software
 module load dtitk/${DTITK_VERSION}
 export DTITK_RIGID_FINE=${DTITK_RIGID_FINE:-0}
+export DTITK_AFFINE_FINE=${DTITK_AFFINE_FINE:-0}
+export DTITK_SPECIES=${DTITK_SPECIES:-human}
+export DTITK_USE_QSUB=0
 . ${DTITK_ROOT}/scripts/dtitk_common.sh
 
 export DTITK_USE_QSUB=0

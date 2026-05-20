@@ -42,9 +42,11 @@ source "${scriptdir}/config.sh"
 module load dtitk/${DTITK_VERSION}
 module load fsl/${FSL_VERSION}
 export DTITK_RIGID_FINE=${DTITK_RIGID_FINE:-0}
+export DTITK_AFFINE_FINE=${DTITK_AFFINE_FINE:-0}
+export DTITK_SPECIES=${DTITK_SPECIES:-human}
+export DTITK_USE_QSUB=0
 . ${DTITK_ROOT}/scripts/dtitk_common.sh
 
-export DTITK_USE_QSUB=0
 ftol=0.002   # default diffeomorphic tolerance
 
 mkdir -p "${workdir}/QC"
