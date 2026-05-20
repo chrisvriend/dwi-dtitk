@@ -1,52 +1,105 @@
-#!/bin/bash 
-
+#!/bin/bash
 # Written by C. Vriend - AmsUMC Jan 2023
-# c.vriend@amsterdamumc.nl
+# Modified: set -euo pipefail, source config, safer loops,
+# input validation, hardcoded bshell replaced with config,
+# temp file cleanup, fixed log naming
 
-# usage instructions
+set -euo pipefail
+
 Usage() {
     cat <<EOF
 
-    (C) C.Vriend - 2/3/2023 - 3c-DTITK_warpqc.sh
-   
-   WIP
-   
+    (C) C.Vriend - AmsUMC - 03b-DTITK_warpqc.sh
+    Computes the mean warped DTI image across all subjects, extracts
+    the L3 eigenvalue map for registration quality inspection, and
+    generates per-subject overlay PNGs.
 
-    Usage: ./3c-DTITK_warpqc.sh warpdir
-    Obligatory: 
-    warpdit = full path to directory with subject/time-point specific files warped
-    to the group template (with 1x1x1 mm voxels)
-    
+    Usage: bash ./03b-DTITK_warpqc.sh warpdir
+      warpdir  full path to directory containing warped subject images
+               (*_space-template_desc-b*_res-?mm_dtitk.nii.gz)
+
 EOF
     exit 1
 }
 
-[ _$1 = _ ] && Usage
-
-module load dtitk/2.3.1
-module load fsl/6.0.6.5
+[ _${1:-} = _ ] && Usage
 
 warpdir=${1}
 
-echo "make overlays for quality inspection"
-cd ${warpdir}
+# source site config
+scriptdir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+source "${scriptdir}/config.sh"
 
-ls -1 *res-?mm_dtitk.nii.gz > subjs_warped.txt
-TVMean -in subjs_warped.txt -out mean_final_high_res.nii.gz
-TVEigenSystem -in mean_final_high_res.nii.gz -type FSL 
-mv mean_final_high_res_L3.nii.gz mean_final_high_res_regcheck.nii.gz
-rm mean_final_high_res_??.nii.gz
-# make pngs of overlay with slicer for QC
-mkdir -p ${warpdir}/QC
+# load software
+module load dtitk/${DTITK_VERSION}
+module load fsl/${FSL_VERSION}
 
-for subj in $(cat subjs_warped.txt); do
-  stem=${subj%_space-template_desc-b1000*}
-  stam=${subj%.nii.gz*}
-  echo "--------"
-  echo ${stem}
-  echo "--------"
+# validate input
+if [ ! -d "${warpdir}" ]; then
+    echo "ERROR: warpdir not found: ${warpdir}" >&2
+    exit 1
+fi
 
-  TVEigenSystem -in ${subj} -type FSL
-  slicer mean_final_high_res_regcheck.nii.gz ${stam}_L3 -a ${warpdir}/QC/${stem}_overlay.png
-  rm ${stam}_??.nii.gz
+cd "${warpdir}"
+
+echo "Making overlays for quality inspection"
+
+# collect warped scans
+mapfile -t warped_scans < <(ls -1 *res-?mm_dtitk.nii.gz 2>/dev/null)
+
+if [ ${#warped_scans[@]} -eq 0 ]; then
+    echo "ERROR: no warped scans (*res-?mm_dtitk.nii.gz) found in ${warpdir}" >&2
+    exit 1
+fi
+
+echo "Found ${#warped_scans[@]} warped scans"
+
+# write list for TVMean
+printf '%s\n' "${warped_scans[@]}" > subjs_warped.txt
+
+###############################################################################
+# Compute mean image and extract L3 eigenvalue map for QC reference
+###############################################################################
+if [ ! -f mean_final_high_res.nii.gz ]; then
+    echo "Computing mean warped image"
+    TVMean -in subjs_warped.txt -out mean_final_high_res.nii.gz
+else
+    echo "mean_final_high_res.nii.gz already exists — skipping TVMean"
+fi
+
+if [ ! -f mean_final_high_res_regcheck.nii.gz ]; then
+    echo "Extracting L3 eigenvalue map for QC reference"
+    TVEigenSystem -in mean_final_high_res.nii.gz -type FSL
+    mv mean_final_high_res_L3.nii.gz mean_final_high_res_regcheck.nii.gz
+    rm -f mean_final_high_res_??.nii.gz
+else
+    echo "mean_final_high_res_regcheck.nii.gz already exists — skipping"
+fi
+
+###############################################################################
+# Per-subject QC overlay PNGs
+###############################################################################
+mkdir -p "${warpdir}/QC"
+
+for subj_scan in "${warped_scans[@]}"; do
+    stem=${subj_scan%_space-template_desc-b${bshell}*}
+    stam=${subj_scan%.nii.gz}
+
+    echo "--------"
+    echo "${stem}"
+    echo "--------"
+
+    if [ -f "${warpdir}/QC/${stem}_overlay.png" ]; then
+        echo "QC overlay already exists for ${stem} — skipping"
+        continue
+    fi
+
+    TVEigenSystem -in "${subj_scan}" -type FSL
+    slicer mean_final_high_res_regcheck.nii.gz \
+           "${stam}_L3.nii.gz" \
+           -a "${warpdir}/QC/${stem}_overlay.png"
+    rm -f "${stam}_??.nii.gz"
 done
+
+echo
+echo "DONE — QC overlays written to ${warpdir}/QC"

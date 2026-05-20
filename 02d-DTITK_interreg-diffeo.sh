@@ -1,106 +1,150 @@
 #!/bin/bash
-
 # Written by C. Vriend - AmsUMC Jan 2023
-# c.vriend@amsterdamumc.nl
+# Modified: set -euo pipefail, source config, removed sleep,
+# --parsable job tracking, safer loops, input validation, trap cleanup
 
+set -euo pipefail
 
-# usage instructions
 Usage() {
     cat <<EOF
 
-    (C) C.Vriend - 2/3/2023 - 2d-DTITK_interreg_diffeo.sh
-   
-   WIP
-   
+    (C) C.Vriend - AmsUMC - 02d-DTITK_interreg-diffeo.sh
+    Perform iterative diffeomorphic inter-subject registration to build
+    the final group diffeomorphic template (6 iterations).
+    Also generates QC overlay PNGs for each subject.
 
-    Usage: ./2d-DTITK_interreg-diffeo.sh headdir
-    Obligatory: 
-    headdir = full path to (head) directory where all folders are stored, 
-	including the subject folders and scripts directory (that includes this script)
-    
+    Usage: bash ./02d-DTITK_interreg-diffeo.sh workdir scriptdir template mask subjects simul
+      workdir    full path to interreg directory
+      scriptdir  full path to scripts directory
+      template   affine template (e.g. mean_affine5.nii.gz)
+      mask       binary brain mask (mask.nii.gz)
+      subjects   affine subjects list (inter_subjects_aff.txt)
+      simul      max simultaneous SLURM array tasks
+
 EOF
     exit 1
 }
 
-[ _$5 = _ ] && Usage
+[ _${6:-} = _ ] && Usage
 
-
-#########################################
-# Setup relevant software and variables
-#########################################
-module load dtitk/2.3.1
-module load fsl/6.0.6.5
-
-. ${DTITK_ROOT}/scripts/dtitk_common.sh
-
-# Sets up variables for folder with tensor images from all subjects
 workdir=${1}
 scriptdir=${2}
-template=${3} # mean_affine${Niter}.nii.gz
-mask=${4}     # mask.nii.gz
-subjects=${5} # inter_subjects_aff.txt
+template=${3}
+mask=${4}
+subjects=${5}
 simul=${6}
 
-mkdir -p ${workdir}/QC
+# source site config
+source "${scriptdir}/config.sh"
 
-ftol=0.002 # default
+# load software
+module load dtitk/${DTITK_VERSION}
+module load fsl/${FSL_VERSION}
+. ${DTITK_ROOT}/scripts/dtitk_common.sh
 
 export DTITK_USE_QSUB=0
+ftol=0.002   # default diffeomorphic tolerance
 
-cd ${workdir}
-# for slurm array
-nsubj=$(cat ${subjects} | wc -l)
+mkdir -p "${workdir}/QC"
+mkdir -p "${workdir}/logs"
+cd "${workdir}"
 
-
-if [ ! -f ${workdir}/mean_diffeomorphic_initial6.nii.gz ]; then
-
-	cp ${template} mean_diffeomorphic_initial0.nii.gz
-	subjects_diffeo=$(echo ${subjects} | sed -e 's/.txt/_diffeo.txt/')
-	rm -fr ${subjects_diffeo}
-	rm -fr diffeo.txt
-
-	for subj in $(cat ${subjects}); do
-		pref=$(remove_ext ${subj})
-		echo ${pref}_diffeo.nii.gz >>${subjects_diffeo}
-		echo ${pref}_diffeo.df.nii.gz >>diffeo.txt
-	done
-
-	count=1
-	template_current=mean_diffeomorphic_initial.nii.gz
-	while [ ${count} -le 6 ]; do
-
-		echo "dti_diffeomorphic_population_initial iteration" $count
-		let level=count
-		let oldcount=count-1
-		ln -sf mean_diffeomorphic_initial${oldcount}.nii.gz ${template_current}
-
-		sbatch --wait --array="1-${nsubj}%${simul}" \
-			${scriptdir}/dti_diffeomorphic_reg_slurm.sh ${template_current} ${subjects} ${mask} 1 ${level} ${ftol}
-
-		echo "update template"
-		template_new=mean_diffeomorphic_initial${count}.nii.gz
-		TVMean -in ${subjects_diffeo} -out ${template_new}
-		VVMean -in diffeo.txt -out mean_df.nii.gz
-		dfToInverse -in mean_df.nii.gz
-		# cp ${template_new} b${template_new}
-		deformationSymTensor3DVolume -in ${template_new} -out ${template_new} \
-			-trans mean_df_inv.nii.gz
-		# clear up the temporary files
-		rm -fr ${template_current}
-		let count=count+1
-
-	done
-
-else
-	echo "diffeomorphic warps already made"
+# validate inputs
+if [ ! -f "${subjects}" ]; then
+    echo "ERROR: subjects file not found: ${subjects}" >&2
+    exit 1
+fi
+if [ ! -f "${template}" ]; then
+    echo "ERROR: template not found: ${template}" >&2
+    exit 1
+fi
+if [ ! -f "${mask}" ]; then
+    echo "ERROR: mask not found: ${mask}" >&2
+    exit 1
 fi
 
-# make pngs of overlay with slicer for QC
-fslroi mean_diffeomorphic_initial6.nii.gz mean_diffeomorphic_initial6_vslicer 0 1
-for subj in $(ls *_aff_diffeo.nii.gz); do
-	echo ${subj}
-	base=${subj%_aff_diffeo.nii.gz*}_diffeo
-	fslroi ${subj} diffeo 0 1
-	slicer mean_diffeomorphic_initial6_vslicer diffeo -a ${workdir}/QC/${base}_overlay.png
-	rm diffeo.nii.gz
+nsubj=$(wc -l < "${subjects}")
+if [ "${nsubj}" -eq 0 ]; then
+    echo "ERROR: subjects file is empty: ${subjects}" >&2
+    exit 1
+fi
+
+echo "Running diffeomorphic registration (6 iterations) for ${nsubj} subjects"
+
+###############################################################################
+# Iterative diffeomorphic registration (6 levels)
+###############################################################################
+if [ -f "${workdir}/mean_diffeomorphic_initial6.nii.gz" ]; then
+    echo "mean_diffeomorphic_initial6.nii.gz already exists — skipping diffeomorphic registration"
+else
+    cp "${template}" mean_diffeomorphic_initial0.nii.gz
+
+    # build diffeo and df lists
+    subjects_diffeo=$(echo "${subjects}" | sed -e 's/.txt/_diffeo.txt/')
+    rm -f "${subjects_diffeo}" diffeo.txt
+
+    while IFS= read -r subj; do
+        pref=$(remove_ext "${subj}")
+        echo "${pref}_diffeo.nii.gz"    >> "${subjects_diffeo}"
+        echo "${pref}_diffeo.df.nii.gz" >> diffeo.txt
+    done < "${subjects}"
+
+    template_current=mean_diffeomorphic_initial.nii.gz
+    count=1
+    while [ ${count} -le 6 ]; do
+        echo "Diffeomorphic iteration ${count}/6"
+        let oldcount=count-1
+        ln -sf "mean_diffeomorphic_initial${oldcount}.nii.gz" "${template_current}"
+
+        jid=$(sbatch --parsable \
+            --wait \
+            --array="1-${nsubj}%${simul}" \
+            --job-name=dtitk-diffeo \
+            --output="${workdir}/logs/reg_diffeo_%A_%a.log" \
+            "${scriptdir}/dti_diffeomorphic_reg_slurm.sh" \
+                "${template_current}" "${subjects}" "${mask}" 1 ${count} "${ftol}")
+        echo "  -> diffeomorphic iteration ${count} job ${jid} complete"
+
+        echo "Updating template"
+        template_new=mean_diffeomorphic_initial${count}.nii.gz
+        TVMean  -in "${subjects_diffeo}" -out "${template_new}"
+        VVMean  -in diffeo.txt           -out mean_df.nii.gz
+        dfToInverse -in mean_df.nii.gz
+        deformationSymTensor3DVolume \
+            -in    "${template_new}" \
+            -out   "${template_new}" \
+            -trans mean_df_inv.nii.gz
+
+        rm -f "${template_current}" mean_df.nii.gz mean_df_inv.nii.gz
+        let count=count+1
+    done
+
+    if [ ! -f mean_diffeomorphic_initial6.nii.gz ]; then
+        echo "ERROR: mean_diffeomorphic_initial6.nii.gz was not created" >&2
+        exit 1
+    fi
+    echo "Final diffeomorphic template: mean_diffeomorphic_initial6.nii.gz"
+fi
+
+###############################################################################
+# QC: overlay each subject's diffeo image on the group template
+###############################################################################
+echo
+echo "Generating QC overlay PNGs"
+
+fslroi mean_diffeomorphic_initial6.nii.gz \
+       mean_diffeomorphic_initial6_vslicer.nii.gz 0 1
+
+for subj in $(ls *_aff_diffeo.nii.gz 2>/dev/null); do
+    base=${subj%_aff_diffeo.nii.gz}_diffeo
+    fslroi "${subj}" diffeo_tmp.nii.gz 0 1
+    slicer mean_diffeomorphic_initial6_vslicer.nii.gz \
+           diffeo_tmp.nii.gz \
+           -a "${workdir}/QC/${base}_overlay.png"
+    rm -f diffeo_tmp.nii.gz
 done
+
+rm -f mean_diffeomorphic_initial6_vslicer.nii.gz
+
+echo
+echo "DONE"

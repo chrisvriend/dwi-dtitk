@@ -1,6 +1,7 @@
-#!/bin/bash 
+#!/bin/bash
 # Written by C. Vriend - AmsUMC Jan 2023
-# c.vriend@amsterdamumc.nl
+# Modified: set -euo pipefail, source config, removed sleep,
+# input validation, fixed log naming
 
 #SBATCH --job-name=dtitk-aff
 #SBATCH --mem-per-cpu=3G
@@ -11,34 +12,76 @@
 #SBATCH --nice=2000
 #SBATCH --output=inter_affine_%A_%a.log
 
-#disabled##SBATCH --array=1-4%4
+set -euo pipefail
 
-module load dtitk/2.3.1
+Usage() {
+    cat <<EOF
 
+    (C) C.Vriend - AmsUMC - dti_affine_reg_slurm.sh
+    SLURM array worker: performs affine registration of one subject
+    to a DTI template using dti_affine_reg.
 
-. ${DTITK_ROOT}/scripts/dtitk_common.sh
+    Usage: sbatch --array=1-N%simul ./dti_affine_reg_slurm.sh template subjects ftol [useInTrans] [coarse]
+      template     DTI template image (.nii.gz)
+      subjects     subjects list file (one subject per line)
+      ftol         convergence tolerance (e.g. 0.01)
+      useInTrans   use existing transform as initialisation (1) or not (empty)
+      coarse       use coarse voxel spacing (1) or fine (0/empty)
 
-export DTITK_USE_QSUB=0
-sep_coarse=$(echo ${lengthscale}*4 | bc -l)
-sep_fine=$(echo ${lengthscale}*2 | bc -l)
-smoption=EDS
+EOF
+    exit 1
+}
+
+[ _${3:-} = _ ] && Usage
 
 template=${1}
 subjects=${2}
 ftol=${3}
-useInTrans=${4}
-coarse=${5}
+useInTrans=${4:-}
+coarse=${5:-0}
 
-subj=$(sed "${SLURM_ARRAY_TASK_ID}q;d" ${subjects})
-# random delay
-duration=$((RANDOM % 20 + 2))
-echo "INITIALIZING..."
-sleep ${duration}
+# source site config
+scriptdir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+source "${scriptdir}/config.sh"
 
+# load software
+module load dtitk/${DTITK_VERSION}
+. ${DTITK_ROOT}/scripts/dtitk_common.sh
 
-#Usage: dti_affine_reg template subject SMOption xsep ysep zsep ftol [useInTrans]
-if test ${coarse} -eq 1; then 
-dti_affine_reg ${template} ${subj} ${smoption} ${sep_coarse} ${sep_coarse} ${sep_coarse} ${ftol} ${useInTrans}
-else 
-dti_affine_reg ${template} ${subj} ${smoption} ${sep_fine} ${sep_fine} ${sep_fine} ${ftol} ${useInTrans}
+export DTITK_USE_QSUB=0
+sep_coarse=$(echo "${lengthscale}*4" | bc -l)
+sep_fine=$(echo "${lengthscale}*2" | bc -l)
+smoption=EDS
+
+# resolve subject from array task ID
+subj=$(sed "${SLURM_ARRAY_TASK_ID}q;d" "${subjects}")
+if [ -z "${subj}" ]; then
+    echo "ERROR: could not resolve subject for SLURM_ARRAY_TASK_ID=${SLURM_ARRAY_TASK_ID}" >&2
+    exit 1
 fi
+
+# validate inputs
+if [ ! -f "${template}" ]; then
+    echo "ERROR: template not found: ${template}" >&2
+    exit 1
+fi
+if [ ! -f "${subj}" ]; then
+    echo "ERROR: subject file not found: ${subj}" >&2
+    exit 1
+fi
+
+echo "Affine registration: ${subj} -> $(basename ${template})"
+echo "  ftol=${ftol}  coarse=${coarse}  useInTrans=${useInTrans:-none}"
+
+# Usage: dti_affine_reg template subject SMOption xsep ysep zsep ftol [useInTrans]
+if [ "${coarse}" -eq 1 ]; then
+    dti_affine_reg "${template}" "${subj}" "${smoption}" \
+        "${sep_coarse}" "${sep_coarse}" "${sep_coarse}" \
+        "${ftol}" ${useInTrans}
+else
+    dti_affine_reg "${template}" "${subj}" "${smoption}" \
+        "${sep_fine}" "${sep_fine}" "${sep_fine}" \
+        "${ftol}" ${useInTrans}
+fi
+
+echo "DONE affine registration for ${subj}"

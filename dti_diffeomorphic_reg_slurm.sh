@@ -1,6 +1,7 @@
-#!/bin/bash 
+#!/bin/bash
 # Written by C. Vriend - AmsUMC Jan 2023
-# c.vriend@amsterdamumc.nl
+# Modified: set -euo pipefail, source config, removed sleep,
+# input validation, fixed log naming
 
 #SBATCH --job-name=dtitk-diffeo
 #SBATCH --mem-per-cpu=3G
@@ -11,15 +12,29 @@
 #SBATCH --nice=2000
 #SBATCH --output=reg_diffeo_%A_%a.log
 
-#disabled##SBATCH --array=1-4%4
+set -euo pipefail
 
-module load dtitk/2.3.1
+Usage() {
+    cat <<EOF
 
-. ${DTITK_ROOT}/scripts/dtitk_common.sh
+    (C) C.Vriend - AmsUMC - dti_diffeomorphic_reg_slurm.sh
+    SLURM array worker: performs diffeomorphic registration of one
+    subject to a DTI template using dti_diffeomorphic_reg.
 
-export DTITK_USE_QSUB=0
+    Usage: sbatch --array=1-N%simul ./dti_diffeomorphic_reg_slurm.sh template subjects mask initial no_of_iter ftol
+      template    DTI template image (.nii.gz)
+      subjects    subjects list file (one subject per line)
+      mask        binary brain mask (.nii.gz)
+      initial     use initial transform (1) or not (0)
+      no_of_iter  number of iterations (e.g. 6)
+      ftol        convergence tolerance (e.g. 0.002)
 
-# inputs
+EOF
+    exit 1
+}
+
+[ _${6:-} = _ ] && Usage
+
 template=${1}
 subjects=${2}
 mask=${3}
@@ -27,14 +42,47 @@ initial=${4}
 no_of_iter=${5}
 ftol=${6}
 
-subj=$(sed "${SLURM_ARRAY_TASK_ID}q;d" ${subjects})
+# source site config
+scriptdir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+source "${scriptdir}/config.sh"
 
-# random delay
-duration=$((RANDOM % 20 + 2))
-echo "INITIALIZING..."
-sleep ${duration}
+# load software
+module load dtitk/${DTITK_VERSION}
+. ${DTITK_ROOT}/scripts/dtitk_common.sh
 
+export DTITK_USE_QSUB=0
 
-# Deformable alignment of a DTI volume (the subject) to a DTI template
-#Usage: dti_diffeomorphic_reg template subject mask initial no_of_iter ftol
-dti_diffeomorphic_reg ${template} ${subj} ${mask} ${initial} ${no_of_iter} ${ftol}
+# resolve subject from array task ID
+subj=$(sed "${SLURM_ARRAY_TASK_ID}q;d" "${subjects}")
+if [ -z "${subj}" ]; then
+    echo "ERROR: could not resolve subject for SLURM_ARRAY_TASK_ID=${SLURM_ARRAY_TASK_ID}" >&2
+    exit 1
+fi
+
+# validate inputs
+if [ ! -f "${template}" ]; then
+    echo "ERROR: template not found: ${template}" >&2
+    exit 1
+fi
+if [ ! -f "${subj}" ]; then
+    echo "ERROR: subject file not found: ${subj}" >&2
+    exit 1
+fi
+if [ ! -f "${mask}" ]; then
+    echo "ERROR: mask not found: ${mask}" >&2
+    exit 1
+fi
+
+echo "Diffeomorphic registration: ${subj} -> $(basename ${template})"
+echo "  initial=${initial}  no_of_iter=${no_of_iter}  ftol=${ftol}"
+
+# Usage: dti_diffeomorphic_reg template subject mask initial no_of_iter ftol
+dti_diffeomorphic_reg \
+    "${template}" \
+    "${subj}" \
+    "${mask}" \
+    "${initial}" \
+    "${no_of_iter}" \
+    "${ftol}"
+
+echo "DONE diffeomorphic registration for ${subj}"

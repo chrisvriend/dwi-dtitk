@@ -1,130 +1,156 @@
 #!/bin/bash
-
-# update usage info
-# run this script from within interactive session as ./2b-DTITK_interreg-rigid.sh path-to-interreg-folder
-
-# works but might be too fast to use sbatch for: takes longer to schedule than run
-
 # Written by C. Vriend - AmsUMC Jan 2023
-# c.vriend@amsterdamumc.nl
+# Modified: set -euo pipefail, source config, removed sleep,
+# dependency-based array submission, improved error handling
 
+set -euo pipefail
 
-# usage instructions
 Usage() {
     cat <<EOF
 
-    (C) C.Vriend - 2/3/2023 - 2b-DTITK_interreg_rigid.sh
-   
-   WIP
-   
+    (C) C.Vriend - AmsUMC - 02b-DTITK_interreg-rigid.sh
+    Perform rigid and affine inter-subject registration to an initial
+    group template (bootstrapped from the IXI aging template).
 
-    Usage: ./2b-DTITK_interreg-rigid.sh workdir scriptdir template subjects simultaneous
-    Obligatory: 
-    headdir = full path to (head) directory where all folders are stored, 
-	including the subject folders and scripts directory (that includes this script)
-    
+    Usage: bash ./02b-DTITK_interreg-rigid.sh workdir scriptdir template subjects simul
+      workdir    full path to interreg directory
+      scriptdir  full path to scripts directory
+      template   full path to IXI aging template (.nii.gz)
+      subjects   subjects list file (inter_subjects.txt)
+      simul      max simultaneous SLURM array tasks
+
 EOF
     exit 1
 }
 
-[ _$4 = _ ] && Usage
+[ _${5:-} = _ ] && Usage
 
-
-
-#########################################
-# Setup relevant software and variables
-#########################################
-module load dtitk/2.3.1
-module load fsl/6.0.6.5
-. ${DTITK_ROOT}/scripts/dtitk_common.sh
-
-
-
-
-# Sets up variables for folder with tensor images from all subjects and recommended template from DTI-TK
 workdir=${1}
 scriptdir=${2}
-template=${3} # ixi template
-subjects=${4} # inter_subjects.txt
+template=${3}
+subjects=${4}
 simul=${5}
 
+# source site config
+source "${scriptdir}/config.sh"
 
-#########################################
-# Creates intial group template from within-subject templates
-#########################################
-# lengthscale is defined in dtitk_common.sh
-sep_coarse=$(echo ${lengthscale}*4 | bc -l)
-sep_fine=$(echo ${lengthscale}*2 | bc -l)
-smoption=EDS # default
+# load software
+module load dtitk/${DTITK_VERSION}
+module load fsl/${FSL_VERSION}
+. ${DTITK_ROOT}/scripts/dtitk_common.sh
+
 export DTITK_USE_QSUB=0
+sep_coarse=$(echo "${lengthscale}*4" | bc -l)
+sep_fine=$(echo "${lengthscale}*2" | bc -l)
+smoption=EDS
 
-
-if [ "${DTITK_RIGID_FINE}" -eq 1 ]; then
+if [ "${DTITK_RIGID_FINE:-0}" -eq 1 ]; then
     countMax=2
 else
     countMax=1
 fi
 
-cd ${workdir}
+cd "${workdir}"
 
-nsubj=$(cat ${subjects} | wc -l)
-
-coarse=1
-######################################################
-# first run rigid alignment to the existing template
-######################################################
-if [ ! -f ${workdir}/mean_initial.nii.gz ]; then
-    count=1
-    while [ $count -le $countMax ]; do
-
-        if [ $count -lt 2 ]; then
-           
-            echo "dti_rigid_reg - count = ${count}"
-            sbatch --wait --array="1-${nsubj}%${simul}" ${scriptdir}/dti_rigid_reg_slurm.sh ${template} ${subjects} 0.01 ${coarse} 
-
-        else
-            echo "dti_rigid_reg - count = ${count}"
-            sbatch --wait --array="1-${nsubj}%${simul}" ${scriptdir}/dti_rigid_reg_slurm.sh ${template} ${subjects} 0.005 1 ${coarse}
-         
-        fi
-        let count=count+1
-    done
-
-
-    # next run affine alignment using the rigid alignment output as initialization
-    count=1
-    while [ $count -le $countMax ]; do
-
-        if [ $count -lt 2 ]; then
-            echo "dti_affine_reg - count = ${count}"
-            sbatch --wait --array="1-${nsubj}%${simul}" ${scriptdir}/dti_affine_reg_slurm.sh ${template} ${subjects} 0.01
-
-        else
-            echo "dti_affine_reg - count = ${count}"
-            sbatch --wait --array="1-${nsubj}%${simul}" ${scriptdir}/dti_affine_reg_slurm.sh ${template} ${subjects} 0.001 1
-        fi
-
-        let count=count+1
-
-    done
-
- # create the subject list file of the affine aligned subjects
-    subjects_aff=dti_template_bootstrap_${RANDOM}
-    for file in $(cat ${subjects}); do
-        echo ${file} | sed -e 's/.nii.gz/_aff.nii.gz/'
-    done >${subjects_aff}
-
-    # compute the initial template
-    TVMean -in ${subjects_aff} -out mean_initial.nii.gz
-    echo "Initial bootstrapped template is computed and saved as mean_initial.nii.gz"
-
-    # clean up
-    rm -fr ${subjects_aff}
-
-
-
-   
-else
-    echo "bootstrapped template already exists"
-
+# validate inputs
+if [ ! -f "${subjects}" ]; then
+    echo "ERROR: subjects file not found: ${subjects}" >&2
+    exit 1
 fi
+if [ ! -f "${template}" ]; then
+    echo "ERROR: template not found: ${template}" >&2
+    exit 1
+fi
+
+nsubj=$(wc -l < "${subjects}")
+if [ "${nsubj}" -eq 0 ]; then
+    echo "ERROR: subjects file is empty: ${subjects}" >&2
+    exit 1
+fi
+echo "Running rigid+affine bootstrap registration for ${nsubj} subjects"
+
+###############################################################################
+# Bootstrap initial group template via rigid then affine registration
+###############################################################################
+if [ -f "${workdir}/mean_initial.nii.gz" ]; then
+    echo "Bootstrapped template already exists — skipping"
+    exit 0
+fi
+
+# ── Rigid registration ────────────────────────────────────────────────────────
+count=1
+while [ ${count} -le ${countMax} ]; do
+    if [ ${count} -lt 2 ]; then
+        ftol=0.01
+        echo "Rigid registration pass ${count} (ftol=${ftol}, coarse)"
+        jid=$(sbatch --parsable \
+            --wait \
+            --array="1-${nsubj}%${simul}" \
+            --job-name=dtitk-rigid \
+            --output="${workdir}/logs/reg_rigid_%A_%a.log" \
+            "${scriptdir}/dti_rigid_reg_slurm.sh" \
+                "${template}" "${subjects}" "${ftol}" "" 1)
+        echo "  -> rigid pass ${count} job ${jid} complete"
+    else
+        ftol=0.005
+        echo "Rigid registration pass ${count} (ftol=${ftol}, coarse)"
+        jid=$(sbatch --parsable \
+            --wait \
+            --array="1-${nsubj}%${simul}" \
+            --job-name=dtitk-rigid \
+            --output="${workdir}/logs/reg_rigid_%A_%a.log" \
+            "${scriptdir}/dti_rigid_reg_slurm.sh" \
+                "${template}" "${subjects}" "${ftol}" 1 1)
+        echo "  -> rigid pass ${count} job ${jid} complete"
+    fi
+    let count=count+1
+done
+
+# ── Affine registration ───────────────────────────────────────────────────────
+count=1
+while [ ${count} -le ${countMax} ]; do
+    if [ ${count} -lt 2 ]; then
+        ftol=0.01
+        echo "Affine registration pass ${count} (ftol=${ftol})"
+        jid=$(sbatch --parsable \
+            --wait \
+            --array="1-${nsubj}%${simul}" \
+            --job-name=dtitk-aff \
+            --output="${workdir}/logs/inter_affine_%A_%a.log" \
+            "${scriptdir}/dti_affine_reg_slurm.sh" \
+                "${template}" "${subjects}" "${ftol}" "" 1)
+        echo "  -> affine pass ${count} job ${jid} complete"
+    else
+        ftol=0.001
+        echo "Affine registration pass ${count} (ftol=${ftol})"
+        jid=$(sbatch --parsable \
+            --wait \
+            --array="1-${nsubj}%${simul}" \
+            --job-name=dtitk-aff \
+            --output="${workdir}/logs/inter_affine_%A_%a.log" \
+            "${scriptdir}/dti_affine_reg_slurm.sh" \
+                "${template}" "${subjects}" "${ftol}" 1 1)
+        echo "  -> affine pass ${count} job ${jid} complete"
+    fi
+    let count=count+1
+done
+
+# ── Compute initial group template from affine-aligned subjects ───────────────
+subjects_aff=$(mktemp "${workdir}/dti_template_bootstrap_XXXXXX.txt")
+trap "rm -f ${subjects_aff}" EXIT
+
+while IFS= read -r file; do
+    echo "${file}" | sed -e 's/.nii.gz/_aff.nii.gz/'
+done < "${subjects}" > "${subjects_aff}"
+
+echo "Computing initial group template (TVMean)"
+TVMean -in "${subjects_aff}" -out mean_initial.nii.gz
+
+if [ ! -f mean_initial.nii.gz ]; then
+    echo "ERROR: mean_initial.nii.gz was not created" >&2
+    exit 1
+fi
+
+echo
+echo "Initial bootstrapped template saved as mean_initial.nii.gz"
+echo "DONE"
