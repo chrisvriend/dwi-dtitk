@@ -32,6 +32,7 @@ subjects=${4}
 simul=${5}
 
 # source site config
+scriptdir=${scriptdir:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 source "${scriptdir}/config.sh"
 
 # load software

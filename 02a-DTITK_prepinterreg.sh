@@ -1,353 +1,136 @@
 #!/bin/bash
-
 # Written by C. Vriend - AmsUMC Jan 2023
-# c.vriend@amsterdamumc.nl
-# Modified for efficiency: dependency chains, generic subject glob,
-# configurable simul, fixed log naming, set -euo pipefail
-#
-# NOTE: Run this script as a plain bash script from a login node in
-# screen/tmux rather than as an sbatch job. It submits all stages
-# with SLURM dependency chains and exits immediately after submission.
-#
-# Usage:
-#   bash ./000-DTITK_wrapper_sbatch.sh <preprocdir> <workdir> <outputdir> [simul]
-#
-# Assumed data structure:
-#
-# HEAD-DIRECTORY/
-# ├── sub-XXX1
-# │   └── ses-Tx
-# ├── sub-XXX2
-# │   ├── ses-Tx
-# │   │    ├── dwi/sub-XXX1_ses-Tx_dwi-space_desc-preproc_dwi|.nii.gz/.bvec/.bval
-# │   │    ├── optional: dwi/sub-XXX1_ses-Tx_dwi-space_desc-desc-[isovf/odi/ndi]_noddi.nii.gz
-# │   └── ses-Tx
-# │   │    ├── dwi/sub-XXX2_ses-Tx_dwi-space_desc-preproc_dwi|.nii.gz/.bvec/.bval
-# │   │    ├── optional: dwi/sub-XXX2_ses-Tx_dwi-space_desc-desc-[isovf/odi/ndi]_noddi.nii.gz
-# ------------
-#    - OR -
-# ------------
-# ├── sub-XXX3
-#          ├──dwi/sub-XXX3_dwi-space_desc-preproc_dwi|.nii.gz/.bvec/.bval
-# │   │    ├── optional: dwi/sub-XXX3_dwi-space_desc-desc-[isovf/odi/ndi]_noddi.nii.gz
-# ├── sub-XXX4
-#          ├──dwi/sub-XXX4_dwi-space_desc-preproc_dwi|.nii.gz/.bvec/.bval
-# │   │    ├── optional: dwi/sub-XXX4_dwi-space_desc-desc-[isovf/odi/ndi]_noddi.nii.gz
-#
-## folders created when running the script ##
-# ├── diffmaps
-# ├── diffvalues  == FINAL OUTPUT: csv files with median diffusivity per tract
-# ├── interreg
-# ├── QC
-# ├── tracts
-# └── warps
+# Modified: set -euo pipefail, existence checks, improved error handling
 
 set -euo pipefail
 
-# ── Usage ─────────────────────────────────────────────────────────────────────
 Usage() {
     cat <<EOF
 
-    (C) C.Vriend - AmsUMC - 000-DTITK_wrapper_sbatch.sh
+    (C) C.Vriend - AmsUMC - 02a-DTITK_prepinterreg.sh
+    Prepare inter-subject registration by collecting subject templates
+    into a single interreg folder via symbolic links.
 
-    Wrapper script: submits all DTI-TK pipeline stages to SLURM using
-    dependency chains. Exits immediately after submission.
-
-    Usage: bash ./000-DTITK_wrapper_sbatch.sh preprocdir workdir outputdir [simul]
-
-    Obligatory:
-      preprocdir  full path to preprocessed DWI derivatives (e.g. /derivatives/dwi-preproc)
-      workdir     full path to working directory where all files will be processed
-      outputdir   full path to final output directory
-
-    Optional:
-      simul       max simultaneous array tasks (default: 7)
+    Usage: bash ./02a-DTITK_prepinterreg.sh workdir
+      workdir  full path to working (head) directory
 
 EOF
     exit 1
 }
 
-[ _${2:-} = _ ] && Usage
+[ _${1:-} = _ ] && Usage
 
-# ── Inputs ────────────────────────────────────────────────────────────────────
-preprocdir=${1}
-workdir=${2}
-outputdir=${3}
-simul=${4:-7}           # 4th argument; default 7
+workdir=${1}
 
-scriptdir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-
-# ── Source site config ────────────────────────────────────────────────────────
+scriptdir=${scriptdir:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 source "${scriptdir}/config.sh"
 
-# ── Pipeline parameters ───────────────────────────────────────────────────────
-Niter=5       # affine registration iterations (default = 5)
-bshell=1000
+mkdir -p "${workdir}/interreg"
+mkdir -p "${workdir}/interreg/logs"
+cd "${workdir}/interreg"
 
-# ── Locate subjects (generic BIDS glob) ───────────────────────────────────────
-cd "${preprocdir}"
+echo "Preparing inter-subject registration directory"
+echo
 
-mapfile -t subj_array < <(ls -d sub-*/ 2>/dev/null | sed 's:/.*::')
+###############################################################################
+# Longitudinal subjects: collect intra-subject templates
+###############################################################################
+find .. -maxdepth 3 -not -path "*/interreg/*" \
+    -name "*_space-intra_template.nii.gz" > scans.txt
 
-if [ ${#subj_array[@]} -eq 0 ]; then
-    echo "ERROR: no subject directories (sub-*/) found in ${preprocdir}" >&2
+if [ "$(wc -l < scans.txt)" -gt 0 ]; then
+    echo "LONGITUDINAL data found"
+    echo
+
+    while IFS= read -r scan; do
+        base=$(basename "${scan}")
+        if [ ! -L "${base}" ]; then
+            ln -sf "${scan}" "${base}"
+        fi
+    done < scans.txt
+
+    ls -1 *_space-intra_template.nii.gz > long_subjects.txt
+    echo "  $(wc -l < long_subjects.txt) longitudinal subject(s) found"
+    rm scans.txt
+else
+    echo "No longitudinal data found"
+    rm scans.txt
+fi
+
+###############################################################################
+# Mixed: subjects with only one timepoint (from subjs1timepoint.txt)
+###############################################################################
+if [ -f "${workdir}/subjs1timepoint.txt" ]; then
+    echo
+    echo "Processing subjects with a single timepoint"
+
+    while IFS= read -r singlesub; do
+        find .. -maxdepth 4 -not -path "*/interreg/*" \
+            -path "*/dwi/*" -name "${singlesub}" >> singlescans.txt
+    done < "${workdir}/subjs1timepoint.txt"
+
+    if [ -f singlescans.txt ] && [ "$(wc -l < singlescans.txt)" -gt 0 ]; then
+        while IFS= read -r scan; do
+            base=$(basename "${scan}")
+            if [ ! -L "${base}" ]; then
+                ln -sf "${scan}" "${base}"
+            fi
+        done < singlescans.txt
+
+        ls -1 *desc-preproc*_dtitk.nii.gz > cross_subjects.txt 2>/dev/null || true
+        echo "  $(wc -l < cross_subjects.txt) single-timepoint subject(s) added"
+        rm singlescans.txt
+    else
+        echo "  WARNING: subjs1timepoint.txt exists but no matching files found"
+        rm -f singlescans.txt
+    fi
+else
+    echo "No subjects with only one session (subjs1timepoint.txt not found)"
+    echo
+fi
+
+###############################################################################
+# Cross-sectional subjects (BIDS without sessions)
+###############################################################################
+find .. -maxdepth 3 -not -path "*/interreg/*" \
+    -path "*/dwi/*" -name "*desc-preproc*_dtitk.nii.gz" > scans.txt
+
+if [ "$(wc -l < scans.txt)" -gt 0 ]; then
+    echo
+    echo "CROSS-SECTIONAL data found"
+    echo
+
+    while IFS= read -r scan; do
+        base=$(basename "${scan}")
+        if [ ! -L "${base}" ]; then
+            ln -sf "${scan}" "${base}"
+        fi
+    done < scans.txt
+    rm scans.txt
+else
+    rm scans.txt
+fi
+
+###############################################################################
+# Build combined subject list for inter-subject registration
+###############################################################################
+ls -1 sub-*.nii.gz > inter_subjects.txt
+
+echo
+if [ -f long_subjects.txt ]; then
+    echo "Longitudinal subjects  : $(wc -l < long_subjects.txt)"
+    if [ -f cross_subjects.txt ]; then
+        echo "Single-timepoint subjs : $(wc -l < cross_subjects.txt)"
+    fi
+    echo "--------"
+fi
+
+ninter=$(wc -l < inter_subjects.txt)
+if [ "${ninter}" -eq 0 ]; then
+    echo "ERROR: inter_subjects.txt is empty — no subjects found for inter-subject registration" >&2
     exit 1
 fi
 
-printf '%s\n' "${subj_array[@]}" > subjects.txt
-nsubj=${#subj_array[@]}
-echo "Found ${nsubj} subjects in ${preprocdir}"
-
-# ── Create workdir ────────────────────────────────────────────────────────────
-mkdir -p "${workdir}"
-mkdir -p "${workdir}/logs"
-
-# =============================================================================
-# STAGE 1 – DWI shell split, dtifit, intra-subject registration (array job)
-# =============================================================================
-echo "Submitting stage 1: fit + intra-subject registration (array 1-${nsubj}%${simul})"
-jid1=$(sbatch --parsable \
-    --array="1-${nsubj}%${simul}" \
-    --job-name=dtitk-fit \
-    --output="${workdir}/logs/1-DTITK_%A_%a.log" \
-    "${scriptdir}/01a-DTITK_fit+intrareg.sh" \
-        "${preprocdir}" "${workdir}" "${preprocdir}/subjects.txt")
-echo "  -> job ${jid1}"
-
-# =============================================================================
-# STAGE 1b – Check fit outputs (runs after all array tasks of stage 1 finish)
-# =============================================================================
-echo "Submitting stage 1b: check fit (depends on ${jid1})"
-jid1b=$(sbatch --parsable \
-    --dependency=afterok:${jid1} \
-    --job-name=dtitk-checkfit \
-    --mem=2G \
-    --partition="${SLURM_PARTITION}" \
-    --qos="${SLURM_QOS}" \
-    --cpus-per-task=1 \
-    --time=00-0:15:00 \
-    --output="${workdir}/logs/1b-DTITK_checkfit_%j.log" \
-    --wrap="bash ${scriptdir}/01b-DTITK_checkfit.sh ${workdir}")
-echo "  -> job ${jid1b}"
-
-# =============================================================================
-# STAGE 2a – Prepare inter-subject registration
-# =============================================================================
-echo "Submitting stage 2a: prep inter-reg (depends on ${jid1b})"
-jid2a=$(sbatch --parsable \
-    --dependency=afterok:${jid1b} \
-    --job-name=dtitk-prepinterreg \
-    --mem=2G \
-    --partition="${SLURM_PARTITION}" \
-    --qos="${SLURM_QOS}" \
-    --cpus-per-task=1 \
-    --time=00-0:15:00 \
-    --output="${workdir}/logs/2a-DTITK_prepinterreg_%j.log" \
-    --wrap="bash ${scriptdir}/02a-DTITK_prepinterreg.sh ${workdir}")
-echo "  -> job ${jid2a}"
-
-# =============================================================================
-# STAGE 2b – Inter-subject rigid registration (launches its own array internally)
-# =============================================================================
-echo "Submitting stage 2b: inter-reg rigid (depends on ${jid2a})"
-jid2b=$(sbatch --parsable \
-    --dependency=afterok:${jid2a} \
-    --job-name=dtitk-interreg-rigid \
-    --mem=4G \
-    --partition="${SLURM_PARTITION}" \
-    --qos="${SLURM_QOS}" \
-    --cpus-per-task=1 \
-    --time=00-2:00:00 \
-    --output="${workdir}/logs/2b-DTITK_interreg-rigid_%j.log" \
-    --wrap="bash ${scriptdir}/02b-DTITK_interreg-rigid.sh \
-        ${workdir}/interreg ${scriptdir} ${IXITEMPLATE} inter_subjects.txt ${simul}")
-echo "  -> job ${jid2b}"
-
-# =============================================================================
-# STAGE 2c – Inter-subject affine registration
-# =============================================================================
-echo "Submitting stage 2c: inter-reg affine (depends on ${jid2b})"
-jid2c=$(sbatch --parsable \
-    --dependency=afterok:${jid2b} \
-    --job-name=dtitk-interreg-affine \
-    --mem=4G \
-    --partition="${SLURM_PARTITION}" \
-    --qos="${SLURM_QOS}" \
-    --cpus-per-task=1 \
-    --time=00-4:00:00 \
-    --output="${workdir}/logs/2c-DTITK_interreg-affine_%j.log" \
-    --wrap="bash ${scriptdir}/02c-DTITK_interreg-affine.sh \
-        ${workdir}/interreg ${scriptdir} inter_subjects.txt ${Niter} ${simul}")
-echo "  -> job ${jid2c}"
-
-# =============================================================================
-# STAGE 2c-post – Move logs and build inter_subjects_aff.txt
-# =============================================================================
-echo "Submitting stage 2c-post: build aff list (depends on ${jid2c})"
-jid2cpost=$(sbatch --parsable \
-    --dependency=afterok:${jid2c} \
-    --job-name=dtitk-afflist \
-    --mem=1G \
-    --partition="${SLURM_PARTITION}" \
-    --qos="${SLURM_QOS}" \
-    --cpus-per-task=1 \
-    --time=00-0:05:00 \
-    --output="${workdir}/logs/2c-post_%j.log" \
-    --wrap="cd ${workdir}/interreg && \
-            mkdir -p logs && \
-            mv *.log logs/ 2>/dev/null || true && \
-            ls -1 sub-*_aff.nii.gz > inter_subjects_aff.txt")
-echo "  -> job ${jid2cpost}"
-
-# =============================================================================
-# STAGE 2d – Inter-subject diffeomorphic registration
-# =============================================================================
-echo "Submitting stage 2d: inter-reg diffeo (depends on ${jid2cpost})"
-jid2d=$(sbatch --parsable \
-    --dependency=afterok:${jid2cpost} \
-    --job-name=dtitk-interreg-diffeo \
-    --mem=4G \
-    --partition="${SLURM_PARTITION}" \
-    --qos="${SLURM_QOS}" \
-    --cpus-per-task=1 \
-    --time=00-4:00:00 \
-    --output="${workdir}/logs/2d-DTITK_interreg-diffeo_%j.log" \
-    --wrap="bash ${scriptdir}/02d-DTITK_interreg-diffeo.sh \
-        ${workdir}/interreg ${scriptdir} \
-        mean_affine${Niter}.nii.gz mask.nii.gz inter_subjects_aff.txt ${simul}")
-echo "  -> job ${jid2d}"
-
-# =============================================================================
-# STAGE 3a – Warp subjects to template (array job, one task per subject)
-# =============================================================================
-echo "Submitting stage 3a: warp to template (array, depends on ${jid2d})"
-jid3a=$(sbatch --parsable \
-    --dependency=afterok:${jid2d} \
-    --array="1-${nsubj}%${simul}" \
-    --job-name=dtitk-warp2template \
-    --output="${workdir}/logs/3a-DTITK_%A_%a.log" \
-    "${scriptdir}/03a-DTITK_warp2template.sh" \
-        "${workdir}" "${bshell}" "${preprocdir}/subjects.txt")
-echo "  -> job ${jid3a}"
-
-# =============================================================================
-# STAGE 3b – Warp QC figures
-# =============================================================================
-echo "Submitting stage 3b: warp QC (depends on ${jid3a})"
-jid3b=$(sbatch --parsable \
-    --dependency=afterok:${jid3a} \
-    --job-name=dtitk-warpqc \
-    --mem=4G \
-    --partition="${SLURM_PARTITION}" \
-    --qos="${SLURM_QOS}" \
-    --cpus-per-task=1 \
-    --time=00-0:30:00 \
-    --output="${workdir}/logs/3b-DTITK_warpqc_%j.log" \
-    --wrap="bash ${scriptdir}/03b-DTITK_warpqc.sh ${workdir}/warps")
-echo "  -> job ${jid3b}"
-
-# =============================================================================
-# STAGE 4 – Extract diffusion maps (array job, one task per subject)
-# =============================================================================
-echo "Submitting stage 4: make diffusion maps (array, depends on ${jid3b})"
-jid4=$(sbatch --parsable \
-    --dependency=afterok:${jid3b} \
-    --array="1-${nsubj}%${simul}" \
-    --job-name=dtitk-diffmaps \
-    --output="${workdir}/logs/4-DTITK_%A_%a.log" \
-    "${scriptdir}/004-DTITK_makediffmaps.sh" \
-        "${workdir}" "${bshell}" "${preprocdir}/subjects.txt")
-echo "  -> job ${jid4}"
-
-# =============================================================================
-# STAGE 5 – TBSS skeleton
-# =============================================================================
-echo "Submitting stage 5: TBSS (depends on ${jid4})"
-jid5=$(sbatch --parsable \
-    --dependency=afterok:${jid4} \
-    --job-name=dtitk-tbss \
-    --mem=8G \
-    --partition="${SLURM_PARTITION}" \
-    --qos="${SLURM_QOS}" \
-    --cpus-per-task=1 \
-    --time=00-1:00:00 \
-    --output="${workdir}/logs/5-DTITK_TBSS_%j.log" \
-    --wrap="ln -sf ${workdir}/warps/mean_final_high_res.nii.gz \
-                   ${workdir}/diffmaps/mean_final_high_res.nii.gz 2>/dev/null || true && \
-            bash ${scriptdir}/005-DTITK_TBSS.sh ${workdir}/diffmaps")
-echo "  -> job ${jid5}"
-
-# =============================================================================
-# STAGE 6 – Warp JHU atlas to template
-# =============================================================================
-echo "Submitting stage 6: warp atlas (depends on ${jid5})"
-jid6=$(sbatch --parsable \
-    --dependency=afterok:${jid5} \
-    --job-name=dtitk-atlas \
-    --output="${workdir}/logs/6-DTITK_atlas_%j.log" \
-    "${scriptdir}/006-DTITK_warpatlas2template.sh" \
-        "${workdir}" "${scriptdir}/JHU-ICBM.labels")
-echo "  -> job ${jid6}"
-
-# =============================================================================
-# STAGE 6-post – Build tractfile.txt
-# =============================================================================
-echo "Submitting stage 6-post: build tractfile (depends on ${jid6})"
-jid6post=$(sbatch --parsable \
-    --dependency=afterok:${jid6} \
-    --job-name=dtitk-tractfile \
-    --mem=1G \
-    --partition="${SLURM_PARTITION}" \
-    --qos="${SLURM_QOS}" \
-    --cpus-per-task=1 \
-    --time=00-0:05:00 \
-    --output="${workdir}/logs/6-post_%j.log" \
-    --wrap="cd ${workdir}/tracts && \
-            ls -1 JHU*.nii.gz > tractfile.txt && \
-            sed -i '/JHU-ICBM-labels_templatespace.nii.gz/d' tractfile.txt && \
-            sed -i 's/.nii.gz//' tractfile.txt")
-echo "  -> job ${jid6post}"
-
-# =============================================================================
-# STAGE 7 – Extract median diffusion values (array job, one task per subject)
-# =============================================================================
-echo "Submitting stage 7: extract diff values (array, depends on ${jid6post})"
-jid7=$(sbatch --parsable \
-    --dependency=afterok:${jid6post} \
-    --array="1-${nsubj}%${simul}" \
-    --job-name=dtitk-extractdiff \
-    --output="${workdir}/logs/7-DTITK_%A_%a.log" \
-    "${scriptdir}/007-DTITK_extract-diffvalues.sh" \
-        "${workdir}" "${workdir}/tracts/tractfile.txt" "${scriptdir}" \
-        "${preprocdir}/subjects.txt")
-echo "  -> job ${jid7}"
-
-# =============================================================================
-# STAGE 8 – Write output
-# =============================================================================
-echo "Submitting stage 8: write output (depends on ${jid7})"
-jid8=$(sbatch --parsable \
-    --dependency=afterok:${jid7} \
-    --job-name=dtitk-output \
-    --mem=4G \
-    --partition="${SLURM_PARTITION}" \
-    --qos="${SLURM_QOS}" \
-    --cpus-per-task=1 \
-    --time=00-0:30:00 \
-    --output="${workdir}/logs/8-DTITK_output_%j.log" \
-    --wrap="bash ${scriptdir}/008-DTITK_write-output.sh \
-        ${workdir} ${outputdir} ${bshell}")
-echo "  -> job ${jid8}"
-
-# =============================================================================
-echo ""
-echo "All stages submitted. Dependency chain:"
-echo "  1 (${jid1}) -> 1b (${jid1b}) -> 2a (${jid2a}) -> 2b (${jid2b})"
-echo "  -> 2c (${jid2c}) -> 2c-post (${jid2cpost}) -> 2d (${jid2d})"
-echo "  -> 3a (${jid3a}) -> 3b (${jid3b}) -> 4 (${jid4})"
-echo "  -> 5 (${jid5}) -> 6 (${jid6}) -> 6-post (${jid6post})"
-echo "  -> 7 (${jid7}) -> 8 (${jid8})"
-echo ""
-echo "Monitor with: squeue -u \${USER}"
-echo "Final output will be written to: ${outputdir}"
-echo "Don't forget to visually inspect registrations and skeletonization."
+echo "Total subjects for inter-subject registration: ${ninter}"
+echo
+echo "DONE"

@@ -1,9 +1,10 @@
 #!/bin/bash
 # Written by C. Vriend - AmsUMC Jan 2023
-# Modified: sourced config, trap cleanup, removed sleep,
-# selective rsync, set -euo pipefail
+# Modified: set -euo pipefail, source config, removed sleep,
+# safer loops, input validation, output existence checks,
+# fixed garbled rm line, scriptdir from env with fallback
 
-#SBATCH --job-name=dtitk-fit
+#SBATCH --job-name=dtitk-dtifit
 #SBATCH --mem-per-cpu=6G
 #SBATCH --partition=luna-cpu-short
 #SBATCH --qos=anw-cpu
@@ -16,13 +17,21 @@ set -euo pipefail
 
 Usage() {
     cat <<EOF
+
     (C) C.Vriend - AmsUMC - 01a-DTITK_fit+intrareg.sh
-    DWI split to b1000, DTITK conversion, intra-subject registration.
+    Per-subject SLURM array worker:
+      1. Splits DWI to b${bshell} shell
+      2. Creates brain mask (synthstrip)
+      3. Bias corrects (ANTs)
+      4. Runs dtifit
+      5. Converts to DTI-TK format (fsl_to_dtitk)
+      6. Performs intra-subject registration (longitudinal only)
 
     Usage: sbatch --array=1-N%simul ./01a-DTITK_fit+intrareg.sh preprocdir workdir subjects
-      preprocdir  full path to preprocessed DWI output
-      workdir     full path to working directory
+      preprocdir  full path to preprocessed DWI derivatives
+      workdir     full path to working (head) directory
       subjects    full path to subjects.txt (one subject per line)
+
 EOF
     exit 1
 }
@@ -32,13 +41,24 @@ EOF
 preprocdir=${1}
 workdir=${2}
 subjects=${3}
-threads=${SLURM_CPUS_PER_TASK}
 
-# source site config (paths, module versions)
-scriptdir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# use scriptdir exported from wrapper; fall back to BASH_SOURCE for interactive use
+scriptdir=${scriptdir:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 source "${scriptdir}/config.sh"
 
-# resolve subject from array task ID - no sleep needed with dependency chains
+# load software
+module load Anaconda3/${ANACONDA_VERSION}
+conda activate "${MRTRIX_ENV}"
+module load dtitk/${DTITK_VERSION}
+module load fsl/${FSL_VERSION}
+module load ANTs/${ANTS_VERSION}
+. ${DTITK_ROOT}/scripts/dtitk_common.sh
+
+export DTITK_USE_QSUB=0
+Niter=5
+threads=2
+
+# resolve subject from array task ID
 subj=$(sed "${SLURM_ARRAY_TASK_ID}q;d" "${subjects}")
 if [ -z "${subj}" ]; then
     echo "ERROR: could not resolve subject for SLURM_ARRAY_TASK_ID=${SLURM_ARRAY_TASK_ID}" >&2
@@ -48,24 +68,14 @@ fi
 QCdir=${workdir}/QC
 mkdir -p "${QCdir}"
 
-# load software from config variables
-module load Anaconda3/${ANACONDA_VERSION}
-conda activate "${PYTHON_ENV}"
-module load dtitk/${DTITK_VERSION}
-module load fsl/${FSL_VERSION}
-module load ANTs/${ANTS_VERSION}
-
-Niter=5
-export DTITK_USE_QSUB=0
-
 echo "-------"
 echo "${subj}"
 echo "-------"
 
 ###############################################################################
-# Per-session: brain mask, bias correction, shell split, dtifit, fsl_to_dtitk
+# Per-session: shell split, brain mask, bias correction, dtifit, fsl_to_dtitk
 ###############################################################################
-for dwidir in ${preprocdir}/${subj}/{,ses*/}dwi; do
+for dwidir in "${preprocdir}/${subj}/"{,ses*/}dwi; do
     [ -d "${dwidir}" ] || continue
 
     sessiondir=$(dirname "${dwidir}")
@@ -79,179 +89,238 @@ for dwidir in ${preprocdir}/${subj}/{,ses*/}dwi; do
         sessionfile=_${session}_
     fi
 
-    # selective rsync: only required input files, avoids duplicating full DWI data
-    mkdir -p "${workdir}/${subj}${sessionpath}dwi"
-    rsync -a \
-        --include="*preproc_dwi.nii.gz" \
-        --include="*preproc_dwi.bvec" \
-        --include="*preproc_dwi.bval" \
-        --include="*noddi.nii.gz" \
-        --exclude="*" \
-        "${preprocdir}/${subj}${sessionpath}dwi/" \
-        "${workdir}/${subj}${sessionpath}dwi/"
-
+    mkdir -p "${workdir}/${subj}${sessionpath}"
+    rsync -a "${preprocdir}/${subj}${sessionpath}dwi" "${workdir}/${subj}${sessionpath}"
     mkdir -p "${workdir}/${subj}${sessionpath}figures"
+
     cd "${workdir}/${subj}${sessionpath}dwi"
 
-    # skip if final output already exists
-    if [ -f "${subj}${sessionfile}space-dwi_desc-preproc-b${bshell}_dtitk.nii.gz" ]; then
-        echo "DTITK file already exists for ${session:-cross-sectional} -- skipping"
-        mkdir -p "${workdir}/${subj}/intra"
-        ln -sf "../${sessionpath}dwi/${subj}${sessionfile}space-dwi_desc-preproc-b${bshell}_dtitk.nii.gz" \
-            "${workdir}/${subj}/intra/${subj}${sessionfile}space-dwi_desc-preproc-b${bshell}_dtitk.nii.gz" \
-            2>/dev/null || true
-        continue
-    fi
-
-    # Brain mask
+    # ── Brain mask ────────────────────────────────────────────────────────────
     if [ ! -f "${subj}${sessionfile}space-dwi_desc-brain_mask.nii.gz" ]; then
-        echo "Creating brain mask"
-        dwiextract -nthreads ${threads} \
+        echo "Creating brain mask for ${subj}${sessionfile}"
+
+        dwiextract -nthreads "${threads}" \
             "${subj}${sessionfile}space-dwi_desc-preproc_dwi.nii.gz" - -bzero \
             -fslgrad "${subj}${sessionfile}space-dwi_desc-preproc_dwi.bvec" \
                      "${subj}${sessionfile}space-dwi_desc-preproc_dwi.bval" \
-            | mrmath - mean "${subj}${sessionfile}space-dwi_desc-nodif_dwi.nii.gz" -axis 3 -force
+            | mrmath - mean \
+                "${subj}${sessionfile}space-dwi_desc-nodif_dwi.nii.gz" -axis 3 -force
 
-        apptainer run --cleanenv "${SYNTHSTRIP}" \
+        apptainer run --cleanenv "${SYNTHSTRIP_SIF}" \
             -i "${subj}${sessionfile}space-dwi_desc-nodif_dwi.nii.gz" \
             -o "${subj}${sessionfile}space-dwi_desc-nodif-brain_dwi.nii.gz" \
             --mask "${subj}${sessionfile}space-dwi_desc-brain_mask.nii.gz"
 
-        fslcpgeom "${subj}${sessionfile}space-dwi_desc-nodif_dwi.nii.gz" \
-                  "${subj}${sessionfile}space-dwi_desc-brain_mask.nii.gz"
+        # fix header after synthstrip
+        fslcpgeom \
+            "${subj}${sessionfile}space-dwi_desc-nodif_dwi.nii.gz" \
+            "${subj}${sessionfile}space-dwi_desc-brain_mask.nii.gz"
 
-        slicer "${subj}${sessionfile}space-dwi_desc-nodif_dwi.nii.gz" \
-               "${subj}${sessionfile}space-dwi_desc-brain_mask.nii.gz" \
-               -a "${workdir}/${subj}${sessionpath}figures/${subj}${sessionfile}maskQC.png"
+        slicer \
+            "${subj}${sessionfile}space-dwi_desc-nodif_dwi.nii.gz" \
+            "${subj}${sessionfile}space-dwi_desc-brain_mask.nii.gz" \
+            -a "${workdir}/${subj}${sessionpath}figures/${subj}${sessionfile}maskQC.png"
     fi
 
-    # Bias correction - trap ensures scratch is cleaned on failure/cancel
-    SCRATCH_DIR="${workdir}/${subj}${sessionpath}tempbiascorrect"
-    trap "rm -rf ${SCRATCH_DIR}" EXIT
+    # ── Shell split + bias correction ─────────────────────────────────────────
+    if [ ! -f "${subj}${sessionfile}space-dwi_desc-preproc-b${bshell}_dwi.nii.gz" ]; then
+        echo "Shell split + bias correction for ${subj}${sessionfile}"
 
-    mrconvert "${subj}${sessionfile}space-dwi_desc-preproc_dwi.nii.gz" \
-        -fslgrad "${subj}${sessionfile}space-dwi_desc-preproc_dwi.bvec" \
-                 "${subj}${sessionfile}space-dwi_desc-preproc_dwi.bval" \
-        "${subj}${sessionfile}space-dwi_desc-preproc_dwi.mif"
+        mrconvert \
+            "${subj}${sessionfile}space-dwi_desc-preproc_dwi.nii.gz" \
+            -fslgrad \
+                "${subj}${sessionfile}space-dwi_desc-preproc_dwi.bvec" \
+                "${subj}${sessionfile}space-dwi_desc-preproc_dwi.bval" \
+            "${subj}${sessionfile}space-dwi_desc-preproc_dwi.mif"
 
-    dwibiascorrect ants \
-        "${subj}${sessionfile}space-dwi_desc-preproc_dwi.mif" \
-        "${subj}${sessionfile}space-dwi_desc-preproc-biascor_dwi.mif" \
-        -nthreads ${threads} \
-        -bias "${subj}${sessionfile}space-dwi_desc-biasest_dwi.mif" \
-        -scratch "${SCRATCH_DIR}"
+        dwibiascorrect ants \
+            "${subj}${sessionfile}space-dwi_desc-preproc_dwi.mif" \
+            "${subj}${sessionfile}space-dwi_desc-preproc-biascor_dwi.mif" \
+            -nthreads "${threads}" \
+            -bias "${subj}${sessionfile}space-dwi_desc-biasest_dwi.mif" \
+            -scratch "${workdir}/${subj}${sessionpath}tempbiascorrect"
 
-    # Shell split
-    dwiextract "${subj}${sessionfile}space-dwi_desc-preproc-biascor_dwi.mif" \
-        b0b${bshell}.mif -shells 0,${bshell}
-    mrconvert b0b${bshell}.mif \
-        "${subj}${sessionfile}space-dwi_desc-preproc-b${bshell}_dwi.nii.gz" \
-        -export_grad_fsl b${bshell}.bvec b${bshell}.bval -force
+        dwiextract \
+            "${subj}${sessionfile}space-dwi_desc-preproc-biascor_dwi.mif" \
+            b0b${bshell}.mif -shells 0,${bshell}
 
-    # dtifit
+        mrconvert b0b${bshell}.mif \
+            "${subj}${sessionfile}space-dwi_desc-preproc-b${bshell}_dwi.nii.gz" \
+            -export_grad_fsl b${bshell}.bvec b${bshell}.bval -force
+
+        rm -f b0b${bshell}.mif \
+              "${subj}${sessionfile}space-dwi_desc-preproc_dwi.mif" \
+              "${subj}${sessionfile}space-dwi_desc-preproc-biascor_dwi.mif"
+    fi
+
+    # ── dtifit ────────────────────────────────────────────────────────────────
     if [ ! -f "${subj}${sessionfile}space-dwi_desc-preproc-b${bshell}_FA.nii.gz" ]; then
-        echo "Running dtifit on b${bshell} shell"
+        echo "dtifit on b${bshell} shell for ${subj}${sessionfile}"
         dtifit \
             -k "${subj}${sessionfile}space-dwi_desc-preproc-b${bshell}_dwi.nii.gz" \
             -m "${subj}${sessionfile}space-dwi_desc-brain_mask.nii.gz" \
             -r b${bshell}.bvec -b b${bshell}.bval \
             -o "${subj}${sessionfile}space-dwi_desc-preproc-b${bshell}" --sse
-        rm -f b${bshell}.bv* b0b${bshell}.mif
+        rm -f b${bshell}.bvec b${bshell}.bval
     fi
 
-    # fsl_to_dtitk
+    # ── fsl_to_dtitk ─────────────────────────────────────────────────────────
     if [ ! -f "${subj}${sessionfile}space-dwi_desc-preproc-b${bshell}_dtitk.nii.gz" ]; then
+        echo "fsl_to_dtitk for ${subj}${sessionfile}"
         fsl_to_dtitk "${subj}${sessionfile}space-dwi_desc-preproc-b${bshell}"
         rm -f *nonSPD.nii.gz *norm.nii.gz *norm_non_outliers.nii.gz
     fi
 
-    echo; echo "Done with timepoint = ${session:-cross-sectional}"; echo
+    echo
+    echo "Done with timepoint = ${session:-cross-sectional}"
+    echo
 
-    rm -f "${subj}${sessionfile}space-dwi_desc-preproc-b${bshell}_??.nii.gz" \
-          *.mif \
-          "${subj}${sessionfile}space-dwi_desc-preproc_dwi."* \
-          "${subj}${sessionfile}space-dwi_label-cnr-maps_desc-preproc_dwi.nii.gz"
+    # clean up intermediate files
+    rm -f \
+        "${subj}${sessionfile}space-dwi_desc-preproc-b${bshell}_??.nii.gz" \
+        "${subj}${sessionfile}space-dwi_desc-preproc_dwi.nii.gz" \
+        "${subj}${sessionfile}space-dwi_desc-preproc_dwi.bvec" \
+        "${subj}${sessionfile}space-dwi_desc-preproc_dwi.bval" \
+        "${subj}${sessionfile}space-dwi_label-cnr-maps_desc-preproc_dwi.nii.gz"
 
+    # symlink into intra dir for registration step
     mkdir -p "${workdir}/${subj}/intra"
-    ln -sf "../${sessionpath}dwi/${subj}${sessionfile}space-dwi_desc-preproc-b${bshell}_dtitk.nii.gz" \
-        "${workdir}/${subj}/intra/${subj}${sessionfile}space-dwi_desc-preproc-b${bshell}_dtitk.nii.gz" \
-        2>/dev/null || true
+    ln -sf \
+        "..${sessionpath}dwi/${subj}${sessionfile}space-dwi_desc-preproc-b${bshell}_dtitk.nii.gz" \
+        "${workdir}/${subj}/intra/${subj}${sessionfile}space-dwi_desc-preproc-b${bshell}_dtitk.nii.gz"
+
 done
 
-echo; echo "DONE converting data to DTITK format"; echo
+echo
+echo "DONE converting data to DTI-TK format"
+echo
 
 ###############################################################################
-# Intra-subject registration (only if >1 timepoint)
+# Intra-subject registration (longitudinal only — skip if single timepoint)
 ###############################################################################
 cd "${workdir}/${subj}/intra"
-ls -1 *desc-preproc-b${bshell}_dtitk.nii.gz > "${subj}.txt"
 
-if [ "$(wc -l < "${subj}.txt")" -le 1 ]; then
-    echo "${subj} has only a single timepoint -- skipping intra-subject registration"
+ls -1 *desc-preproc-b${bshell}_dtitk.nii.gz > "${subj}.txt"
+ntimepoints=$(wc -l < "${subj}.txt")
+
+if [ "${ntimepoints}" -le 1 ]; then
+    echo "${subj} has only a single timepoint — skipping intra-subject registration"
     rm -rf "${workdir}/${subj}/intra"
+    echo
+    echo "DONE — ${subj}"
     exit 0
 fi
 
-echo; echo "Continuing with intra-subject registration"; echo
+echo "Continuing with intra-subject registration (${ntimepoints} timepoints)"
+echo
 
+# ── Bootstrap initial intra-subject template ─────────────────────────────────
 if [ ! -f "${subj}_mean_initial.nii.gz" ]; then
-    dti_template_bootstrap "${IXITEMPLATE}" "${subj}.txt" EDS
+    echo "Running initial template construction"
+    dti_template_bootstrap \
+        "${IXITEMPLATE}/ixi_aging_template.nii.gz" \
+        "${subj}.txt" EDS
     mv mean_initial.nii.gz "${subj}_mean_initial.nii.gz"
+else
+    echo "Template bootstrapping already done"
 fi
 
+# ── Affine registration to intra-subject template ────────────────────────────
 if [ ! -f "${subj}_mean_affine${Niter}.nii.gz" ]; then
-    dti_affine_population "${subj}_mean_initial.nii.gz" "${subj}.txt" EDS ${Niter}
-    mv mean_affine${Niter}.nii.gz "${subj}_mean_affine${Niter}.nii.gz"
+    echo "Running affine registration to initial template"
+    dti_affine_population \
+        "${subj}_mean_initial.nii.gz" \
+        "${subj}.txt" EDS "${Niter}"
+    mv "mean_affine${Niter}.nii.gz" "${subj}_mean_affine${Niter}.nii.gz"
+else
+    echo "Affine registration already done"
 fi
 
+# ── Binary mask of affine template ───────────────────────────────────────────
 if [ ! -f "${subj}_mask.nii.gz" ]; then
+    echo "Making binary mask"
     TVtool -in "${subj}_mean_affine${Niter}.nii.gz" -tr
     BinaryThresholdImageFilter \
-        "${subj}_mean_affine${Niter}_tr.nii.gz" "${subj}_mask.nii.gz" 0.01 100 1 0
+        "${subj}_mean_affine${Niter}_tr.nii.gz" \
+        "${subj}_mask.nii.gz" 0.01 100 1 0
+else
+    echo "Binary mask already exists"
 fi
 
+# ── Diffeomorphic registration ───────────────────────────────────────────────
 if [ ! -f "${subj}_diffeomorphic.nii.gz" ]; then
+    echo "Running diffeomorphic registration"
+
+    # build affine list
+    ls -1 *_aff.nii.gz > "${subj}_aff.txt"
+
     dti_diffeomorphic_population \
-        "${subj}_mean_affine${Niter}.nii.gz" "${subj}_aff.txt" "${subj}_mask.nii.gz" 0.002
+        "${subj}_mean_affine${Niter}.nii.gz" \
+        "${subj}_aff.txt" \
+        "${subj}_mask.nii.gz" 0.002
+
     mv mean_diffeomorphic_initial6.nii.gz "${subj}_diffeomorphic.nii.gz"
+else
+    echo "Diffeomorphic registration already done"
 fi
 
-echo "Making non-linear transform for each timepoint"
-for dtitkscan in $(cat "${subj}.txt"); do
+# ── Compose warp fields and warp each timepoint to intra-subject template ────
+echo "Composing warp fields and warping timepoints to intra-subject template"
+
+while IFS= read -r dtitkscan; do
     dtitkbase=$(remove_ext "${dtitkscan}")
-    if [[ ${dtitkbase} =~ sub-([[:alnum:]_-]+)_space ]]; then
+
+    # extract sub-XXX_ses-YY from filename
+    if [[ "${dtitkbase}" =~ (sub-[^_]+(_ses-[^_]+)?) ]]; then
         subj_session=${BASH_REMATCH[1]}
     else
-        echo "ERROR: cannot determine subjID or session from ${dtitkbase}" >&2
-        continue
+        echo "ERROR: cannot determine subject/session from ${dtitkbase}" >&2
+        exit 1
     fi
-    echo "${subj_session}"
 
+    # compose affine + diffeomorphic warp
     if [ ! -f "${dtitkbase}_dwi-2-intra.df.nii.gz" ]; then
         dfRightComposeAffine \
             -aff "${dtitkbase}.aff" \
             -df  "${dtitkbase}_aff_diffeo.df.nii.gz" \
             -out "${dtitkbase}_dwi-2-intra.df.nii.gz"
+    else
+        echo "Warp already composed for ${subj_session}"
     fi
 
-    if [ ! -f "sub-${subj_session}_space-intra_dtitk.nii.gz" ]; then
+    # warp timepoint to intra-subject template
+    if [ ! -f "${subj_session}_space-intra_dtitk.nii.gz" ]; then
+        echo "Warping ${subj_session} to intra-subject template"
         deformationSymTensor3DVolume \
             -in     "${dtitkscan}" \
             -trans  "${dtitkbase}_dwi-2-intra.df.nii.gz" \
             -target "${subj}_mean_initial.nii.gz" \
-            -out    "sub-${subj_session}_space-intra_dtitk.nii.gz"
+            -out    "${subj_session}_space-intra_dtitk.nii.gz"
+    else
+        echo "Warped image already exists for ${subj_session}"
     fi
-done
 
+done < "${subj}.txt"
+
+# ── Mean image across timepoints in intra-subject template space ──────────────
 if [ ! -f "${subj}_space-intra_template.nii.gz" ]; then
+    echo
+    echo "Creating mean image across timepoints in intra-subject template space"
     ls -1 *_space-intra_dtitk.nii.gz > "${subj}_intra_reg_volumes.txt"
-    TVMean -in "${subj}_intra_reg_volumes.txt" -out "${subj}_space-intra_template.nii.gz"
+    TVMean \
+        -in  "${subj}_intra_reg_volumes.txt" \
+        -out "${subj}_space-intra_template.nii.gz"
+else
+    echo "Mean intra-subject template already exists"
 fi
 
+# ── Clean up ─────────────────────────────────────────────────────────────────
 if [ -f "${subj}_space-intra_template.nii.gz" ]; then
-    rm -f mean_affine*.nii.gz mean_diffeomorphic_initial*.nii.gz \
-          "${subj}_mean_affine${Niter}_tr.nii.gz" "${subj}_intra_reg_volumes.txt"
+    rm -f mean_affine*.nii.gz \
+          mean_diffeomorphic_initial*.nii.gz \
+          "${subj}_mean_affine${Niter}_tr.nii.gz" \
+          "${subj}_intra_reg_volumes.txt"
 fi
 
-cd "${workdir}"
-echo; echo "DONE with intra-subject registration for ${subj}"
+echo
+echo "DONE with intra-subject registration for ${subj}"

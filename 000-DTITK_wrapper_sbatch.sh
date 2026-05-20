@@ -3,7 +3,8 @@
 # Written by C. Vriend - AmsUMC Jan 2023
 # c.vriend@amsterdamumc.nl
 # Modified for efficiency: dependency chains, generic subject glob,
-# configurable simul, fixed log naming, set -euo pipefail
+# configurable simul, fixed log naming, set -euo pipefail,
+# scriptdir exported so all sbatch jobs can find config.sh
 #
 # NOTE: Run this script as a plain bash script from a login node in
 # screen/tmux rather than as an sbatch job. It submits all stages
@@ -11,36 +12,6 @@
 #
 # Usage:
 #   bash ./000-DTITK_wrapper_sbatch.sh <preprocdir> <workdir> <outputdir> [simul]
-#
-# Assumed data structure:
-#
-# HEAD-DIRECTORY/
-# ├── sub-XXX1
-# │   └── ses-Tx
-# ├── sub-XXX2
-# │   ├── ses-Tx
-# │   │    ├── dwi/sub-XXX1_ses-Tx_dwi-space_desc-preproc_dwi|.nii.gz/.bvec/.bval
-# │   │    ├── optional: dwi/sub-XXX1_ses-Tx_dwi-space_desc-desc-[isovf/odi/ndi]_noddi.nii.gz
-# │   └── ses-Tx
-# │   │    ├── dwi/sub-XXX2_ses-Tx_dwi-space_desc-preproc_dwi|.nii.gz/.bvec/.bval
-# │   │    ├── optional: dwi/sub-XXX2_ses-Tx_dwi-space_desc-desc-[isovf/odi/ndi]_noddi.nii.gz
-# ------------
-#    - OR -
-# ------------
-# ├── sub-XXX3
-#          ├──dwi/sub-XXX3_dwi-space_desc-preproc_dwi|.nii.gz/.bvec/.bval
-# │   │    ├── optional: dwi/sub-XXX3_dwi-space_desc-desc-[isovf/odi/ndi]_noddi.nii.gz
-# ├── sub-XXX4
-#          ├──dwi/sub-XXX4_dwi-space_desc-preproc_dwi|.nii.gz/.bvec/.bval
-# │   │    ├── optional: dwi/sub-XXX4_dwi-space_desc-desc-[isovf/odi/ndi]_noddi.nii.gz
-#
-## folders created when running the script ##
-# ├── diffmaps
-# ├── diffvalues  == FINAL OUTPUT: csv files with median diffusivity per tract
-# ├── interreg
-# ├── QC
-# ├── tracts
-# └── warps
 
 set -euo pipefail
 
@@ -56,8 +27,8 @@ Usage() {
     Usage: bash ./000-DTITK_wrapper_sbatch.sh preprocdir workdir outputdir [simul]
 
     Obligatory:
-      preprocdir  full path to preprocessed DWI derivatives (e.g. /derivatives/dwi-preproc)
-      workdir     full path to working directory where all files will be processed
+      preprocdir  full path to preprocessed DWI derivatives
+      workdir     full path to working directory
       outputdir   full path to final output directory
 
     Optional:
@@ -73,17 +44,22 @@ EOF
 preprocdir=${1}
 workdir=${2}
 outputdir=${3}
-simul=${4:-7}           # 4th argument; default 7
+simul=${4:-7}
 
-scriptdir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# Resolve scriptdir once on the login node as an absolute path.
+# This is exported so every sbatch job receives it as an environment variable
+# and does not need to re-derive it from BASH_SOURCE[0] (which would resolve
+# to /var/spool/slurm/... on the compute node).
+export scriptdir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
 # ── Source site config ────────────────────────────────────────────────────────
 source "${scriptdir}/config.sh"
 
 # ── Pipeline parameters ───────────────────────────────────────────────────────
-Niter=5       # affine registration iterations (default = 5)
+Niter=5
+bshell=${bshell:-1000}
 
-# ── Locate subjects (generic BIDS glob) ───────────────────────────────────────
+# ── Locate subjects ───────────────────────────────────────────────────────────
 cd "${preprocdir}"
 
 mapfile -t subj_array < <(ls -d sub-*/ 2>/dev/null | sed 's:/.*::')
@@ -93,31 +69,35 @@ if [ ${#subj_array[@]} -eq 0 ]; then
     exit 1
 fi
 
-printf '%s\n' "${subj_array[@]}" > ${workdir}/subjects.txt
+printf '%s\n' "${subj_array[@]}" > subjects.txt
 nsubj=${#subj_array[@]}
 echo "Found ${nsubj} subjects in ${preprocdir}"
 
-# ── Create workdir ────────────────────────────────────────────────────────────
 mkdir -p "${workdir}"
 mkdir -p "${workdir}/logs"
 
+# Common sbatch export flag — passes scriptdir to every job
+EXPORT="ALL,scriptdir=${scriptdir}"
+
 # =============================================================================
-# STAGE 1 – DWI shell split, dtifit, intra-subject registration (array job)
+# STAGE 1 – fit + intra-subject registration (array)
 # =============================================================================
 echo "Submitting stage 1: fit + intra-subject registration (array 1-${nsubj}%${simul})"
 jid1=$(sbatch --parsable \
+    --export="${EXPORT}" \
     --array="1-${nsubj}%${simul}" \
     --job-name=dtitk-fit \
     --output="${workdir}/logs/1-DTITK_%A_%a.log" \
     "${scriptdir}/01a-DTITK_fit+intrareg.sh" \
-        "${preprocdir}" "${workdir}" "${workdir}/subjects.txt")
+        "${preprocdir}" "${workdir}" "${preprocdir}/subjects.txt")
 echo "  -> job ${jid1}"
 
 # =============================================================================
-# STAGE 1b – Check fit outputs (runs after all array tasks of stage 1 finish)
+# STAGE 1b – check fit
 # =============================================================================
 echo "Submitting stage 1b: check fit (depends on ${jid1})"
 jid1b=$(sbatch --parsable \
+    --export="${EXPORT}" \
     --dependency=afterok:${jid1} \
     --job-name=dtitk-checkfit \
     --mem=2G \
@@ -130,10 +110,11 @@ jid1b=$(sbatch --parsable \
 echo "  -> job ${jid1b}"
 
 # =============================================================================
-# STAGE 2a – Prepare inter-subject registration
+# STAGE 2a – prepare inter-subject registration
 # =============================================================================
 echo "Submitting stage 2a: prep inter-reg (depends on ${jid1b})"
 jid2a=$(sbatch --parsable \
+    --export="${EXPORT}" \
     --dependency=afterok:${jid1b} \
     --job-name=dtitk-prepinterreg \
     --mem=2G \
@@ -146,10 +127,11 @@ jid2a=$(sbatch --parsable \
 echo "  -> job ${jid2a}"
 
 # =============================================================================
-# STAGE 2b – Inter-subject rigid registration (launches its own array internally)
+# STAGE 2b – inter-subject rigid registration
 # =============================================================================
 echo "Submitting stage 2b: inter-reg rigid (depends on ${jid2a})"
 jid2b=$(sbatch --parsable \
+    --export="${EXPORT}" \
     --dependency=afterok:${jid2a} \
     --job-name=dtitk-interreg-rigid \
     --mem=4G \
@@ -163,10 +145,11 @@ jid2b=$(sbatch --parsable \
 echo "  -> job ${jid2b}"
 
 # =============================================================================
-# STAGE 2c – Inter-subject affine registration
+# STAGE 2c – inter-subject affine registration
 # =============================================================================
 echo "Submitting stage 2c: inter-reg affine (depends on ${jid2b})"
 jid2c=$(sbatch --parsable \
+    --export="${EXPORT}" \
     --dependency=afterok:${jid2b} \
     --job-name=dtitk-interreg-affine \
     --mem=4G \
@@ -180,10 +163,11 @@ jid2c=$(sbatch --parsable \
 echo "  -> job ${jid2c}"
 
 # =============================================================================
-# STAGE 2c-post – Move logs and build inter_subjects_aff.txt
+# STAGE 2c-post – build inter_subjects_aff.txt
 # =============================================================================
 echo "Submitting stage 2c-post: build aff list (depends on ${jid2c})"
 jid2cpost=$(sbatch --parsable \
+    --export="${EXPORT}" \
     --dependency=afterok:${jid2c} \
     --job-name=dtitk-afflist \
     --mem=1G \
@@ -199,10 +183,11 @@ jid2cpost=$(sbatch --parsable \
 echo "  -> job ${jid2cpost}"
 
 # =============================================================================
-# STAGE 2d – Inter-subject diffeomorphic registration
+# STAGE 2d – inter-subject diffeomorphic registration
 # =============================================================================
 echo "Submitting stage 2d: inter-reg diffeo (depends on ${jid2cpost})"
 jid2d=$(sbatch --parsable \
+    --export="${EXPORT}" \
     --dependency=afterok:${jid2cpost} \
     --job-name=dtitk-interreg-diffeo \
     --mem=4G \
@@ -217,23 +202,25 @@ jid2d=$(sbatch --parsable \
 echo "  -> job ${jid2d}"
 
 # =============================================================================
-# STAGE 3a – Warp subjects to template (array job, one task per subject)
+# STAGE 3a – warp subjects to template (array)
 # =============================================================================
 echo "Submitting stage 3a: warp to template (array, depends on ${jid2d})"
 jid3a=$(sbatch --parsable \
+    --export="${EXPORT}" \
     --dependency=afterok:${jid2d} \
     --array="1-${nsubj}%${simul}" \
     --job-name=dtitk-warp2template \
     --output="${workdir}/logs/3a-DTITK_%A_%a.log" \
     "${scriptdir}/03a-DTITK_warp2template.sh" \
-        "${workdir}" "${bshell}" "${workdir}/subjects.txt")
+        "${workdir}" "${bshell}" "${preprocdir}/subjects.txt")
 echo "  -> job ${jid3a}"
 
 # =============================================================================
-# STAGE 3b – Warp QC figures
+# STAGE 3b – warp QC figures
 # =============================================================================
 echo "Submitting stage 3b: warp QC (depends on ${jid3a})"
 jid3b=$(sbatch --parsable \
+    --export="${EXPORT}" \
     --dependency=afterok:${jid3a} \
     --job-name=dtitk-warpqc \
     --mem=4G \
@@ -246,16 +233,17 @@ jid3b=$(sbatch --parsable \
 echo "  -> job ${jid3b}"
 
 # =============================================================================
-# STAGE 4 – Extract diffusion maps (array job, one task per subject)
+# STAGE 4 – extract diffusion maps (array)
 # =============================================================================
 echo "Submitting stage 4: make diffusion maps (array, depends on ${jid3b})"
 jid4=$(sbatch --parsable \
+    --export="${EXPORT}" \
     --dependency=afterok:${jid3b} \
     --array="1-${nsubj}%${simul}" \
     --job-name=dtitk-diffmaps \
     --output="${workdir}/logs/4-DTITK_%A_%a.log" \
     "${scriptdir}/004-DTITK_makediffmaps.sh" \
-        "${workdir}" "${bshell}" "${workdir}/subjects.txt")
+        "${workdir}" "${bshell}" "${preprocdir}/subjects.txt")
 echo "  -> job ${jid4}"
 
 # =============================================================================
@@ -263,6 +251,7 @@ echo "  -> job ${jid4}"
 # =============================================================================
 echo "Submitting stage 5: TBSS (depends on ${jid4})"
 jid5=$(sbatch --parsable \
+    --export="${EXPORT}" \
     --dependency=afterok:${jid4} \
     --job-name=dtitk-tbss \
     --mem=8G \
@@ -277,10 +266,11 @@ jid5=$(sbatch --parsable \
 echo "  -> job ${jid5}"
 
 # =============================================================================
-# STAGE 6 – Warp JHU atlas to template
+# STAGE 6 – warp JHU atlas to template
 # =============================================================================
 echo "Submitting stage 6: warp atlas (depends on ${jid5})"
 jid6=$(sbatch --parsable \
+    --export="${EXPORT}" \
     --dependency=afterok:${jid5} \
     --job-name=dtitk-atlas \
     --output="${workdir}/logs/6-DTITK_atlas_%j.log" \
@@ -289,10 +279,11 @@ jid6=$(sbatch --parsable \
 echo "  -> job ${jid6}"
 
 # =============================================================================
-# STAGE 6-post – Build tractfile.txt
+# STAGE 6-post – build tractfile.txt
 # =============================================================================
 echo "Submitting stage 6-post: build tractfile (depends on ${jid6})"
 jid6post=$(sbatch --parsable \
+    --export="${EXPORT}" \
     --dependency=afterok:${jid6} \
     --job-name=dtitk-tractfile \
     --mem=1G \
@@ -308,24 +299,26 @@ jid6post=$(sbatch --parsable \
 echo "  -> job ${jid6post}"
 
 # =============================================================================
-# STAGE 7 – Extract median diffusion values (array job, one task per subject)
+# STAGE 7 – extract median diffusion values (array)
 # =============================================================================
 echo "Submitting stage 7: extract diff values (array, depends on ${jid6post})"
 jid7=$(sbatch --parsable \
+    --export="${EXPORT}" \
     --dependency=afterok:${jid6post} \
     --array="1-${nsubj}%${simul}" \
     --job-name=dtitk-extractdiff \
     --output="${workdir}/logs/7-DTITK_%A_%a.log" \
     "${scriptdir}/007-DTITK_extract-diffvalues.sh" \
         "${workdir}" "${workdir}/tracts/tractfile.txt" "${scriptdir}" \
-        "${workdir}/subjects.txt")
+        "${preprocdir}/subjects.txt")
 echo "  -> job ${jid7}"
 
 # =============================================================================
-# STAGE 8 – Write output
+# STAGE 8 – write output
 # =============================================================================
 echo "Submitting stage 8: write output (depends on ${jid7})"
 jid8=$(sbatch --parsable \
+    --export="${EXPORT}" \
     --dependency=afterok:${jid7} \
     --job-name=dtitk-output \
     --mem=4G \
@@ -349,4 +342,3 @@ echo "  -> 7 (${jid7}) -> 8 (${jid8})"
 echo ""
 echo "Monitor with: squeue -u \${USER}"
 echo "Final output will be written to: ${outputdir}"
-echo "Don't forget to visually inspect registrations and skeletonization."

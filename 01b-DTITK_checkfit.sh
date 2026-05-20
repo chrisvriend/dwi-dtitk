@@ -24,6 +24,9 @@ EOF
 
 workdir=${1}
 
+scriptdir=${scriptdir:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
+source "${scriptdir}/config.sh"
+
 if [ ! -d "${workdir}" ]; then
     echo "ERROR: workdir not found: ${workdir}" >&2
     exit 1
@@ -50,7 +53,6 @@ for subj in "${subj_dirs[@]}"; do
     cd "${workdir}/${subj}"
 
     if [ ! -d "${workdir}/${subj}/intra" ]; then
-        # no intra dir: expect exactly one dtitk file (single timepoint)
         n_dtitk=$(find . -path '*/dwi/*' \
             -name "*desc-preproc*_dtitk.nii.gz" 2>/dev/null | wc -l)
 
@@ -65,7 +67,6 @@ for subj in "${subj_dirs[@]}"; do
         fi
 
     else
-        # intra dir exists: expect exactly one intra-subject template
         n_intra=$(find . -path '*/intra/*' \
             -name "*_space-intra_template.nii.gz" 2>/dev/null | wc -l)
 

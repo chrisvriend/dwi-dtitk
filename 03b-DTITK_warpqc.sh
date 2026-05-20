@@ -27,7 +27,7 @@ EOF
 warpdir=${1}
 
 # source site config
-scriptdir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+scriptdir=${scriptdir:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 source "${scriptdir}/config.sh"
 
 # load software
