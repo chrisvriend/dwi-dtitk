@@ -127,6 +127,7 @@ if [ -f "${regdir}/long_subjects.txt" ]; then
         fi
 
         # process each session
+        shopt -s nullglob
         for sesdir in "${workdir}/${subj}"/ses*/; do
             [ -d "${sesdir}" ] || continue
             session=$(basename "${sesdir}")
@@ -163,6 +164,8 @@ if [ -f "${regdir}/long_subjects.txt" ]; then
                 echo "Warped image already exists for ${subj} ${session}"
             fi
         done
+        shopt -u nullglob
+
 
     fi
 fi

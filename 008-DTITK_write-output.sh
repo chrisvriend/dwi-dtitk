@@ -104,7 +104,8 @@ echo "Copying per-subject outputs for ${#subj_dirs[@]} subjects"
 
 for subj in "${subj_dirs[@]}"; do
 
-    for dwidir in "${workdir}/${subj}/"{,ses*/}dwi; do
+    shopt -s nullglob
+    for dwidir in "${workdir}/${subj}/dwi" "${workdir}/${subj}/ses-"*/dwi; do
         [ -d "${dwidir}" ] || continue
 
         sessiondir=$(dirname "${dwidir}")
@@ -146,6 +147,8 @@ for subj in "${subj_dirs[@]}"; do
             "${outputdir}/${subj}${sessionpath}figures/" 2>/dev/null || true
 
     done
+    shopt -u nullglob
+
 done
 
 ###############################################################################

@@ -78,7 +78,8 @@ echo "-------"
 ###############################################################################
 # Per-session: shell split, brain mask, bias correction, dtifit, fsl_to_dtitk
 ###############################################################################
-for dwidir in "${preprocdir}/${subj}/"{,ses*/}dwi; do
+shopt -s nullglob
+for dwidir in "${preprocdir}/${subj}/dwi" "${preprocdir}/${subj}/ses-"*/dwi; do
     [ -d "${dwidir}" ] || continue
 
     sessiondir=$(dirname "${dwidir}")
@@ -193,6 +194,8 @@ for dwidir in "${preprocdir}/${subj}/"{,ses*/}dwi; do
         "${workdir}/${subj}/intra/${subj}${sessionfile}space-dwi_desc-preproc-b${bshell}_dtitk.nii.gz"
 
 done
+shopt -u nullglob
+
 
 echo
 echo "DONE converting data to DTI-TK format"
