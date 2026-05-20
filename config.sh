@@ -12,7 +12,7 @@ export ANTS_VERSION=2.5.1
 export ANACONDA_VERSION=2024.02-1
 
 # --- Python / conda environment ---
-export PYTHON_ENV=/scratch/anw/share/python-env/mrtrix
+export MRTRIX_ENV=/scratch/anw/share/python-env/mrtrix
 
 # --- External tool paths ---
 export SYNTHSTRIP=/scratch/anw/share-np/fmridenoiser/synthstrip.1.2.sif

@@ -56,7 +56,7 @@ module load ANTs/${ANTS_VERSION}
 
 export DTITK_USE_QSUB=0
 Niter=5
-threads=2
+threads=${SLURM_CPUS_PER_TASK:-1}
 
 # resolve subject from array task ID
 subj=$(sed "${SLURM_ARRAY_TASK_ID}q;d" "${subjects}")
