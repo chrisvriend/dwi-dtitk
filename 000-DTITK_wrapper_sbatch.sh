@@ -4,7 +4,8 @@
 # c.vriend@amsterdamumc.nl
 # Modified for efficiency: dependency chains, generic subject glob,
 # configurable simul, fixed log naming, set -euo pipefail,
-# scriptdir exported so all sbatch jobs can find config.sh
+# scriptdir exported so all sbatch jobs can find config.sh,
+# --kill-on-invalid-dep=yes so downstream jobs are cancelled on failure
 #
 # NOTE: Run this script as a plain bash script from a login node in
 # screen/tmux rather than as an sbatch job. It submits all stages
@@ -47,10 +48,10 @@ outputdir=${3}
 simul=${4:-7}
 
 # Resolve scriptdir once on the login node as an absolute path.
-# This is exported so every sbatch job receives it as an environment variable
-# and does not need to re-derive it from BASH_SOURCE[0] (which would resolve
-# to /var/spool/slurm/... on the compute node).
-export scriptdir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# Exported so every sbatch job receives it as an environment variable
+# and does not need to re-derive it from BASH_SOURCE[0].
+export scriptdir
+scriptdir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
 # ── Source site config ────────────────────────────────────────────────────────
 source "${scriptdir}/config.sh"
@@ -76,15 +77,21 @@ echo "Found ${nsubj} subjects in ${preprocdir}"
 mkdir -p "${workdir}"
 mkdir -p "${workdir}/logs"
 
-# Common sbatch export flag — passes scriptdir to every job
-EXPORT="ALL,scriptdir=${scriptdir}"
+# ── Common sbatch flags ───────────────────────────────────────────────────────
+# --kill-on-invalid-dep=yes  : automatically cancel jobs whose upstream
+#                              dependency failed (avoids orphaned queue entries)
+# --export                   : pass scriptdir to every job so config.sh is found
+sbatch_common=(
+    --kill-on-invalid-dep=yes
+    --export="ALL,scriptdir=${scriptdir}"
+)
 
 # =============================================================================
 # STAGE 1 – fit + intra-subject registration (array)
 # =============================================================================
 echo "Submitting stage 1: fit + intra-subject registration (array 1-${nsubj}%${simul})"
 jid1=$(sbatch --parsable \
-    --export="${EXPORT}" \
+    "${sbatch_common[@]}" \
     --array="1-${nsubj}%${simul}" \
     --job-name=dtitk-fit \
     --output="${workdir}/logs/1-DTITK_%A_%a.log" \
@@ -97,7 +104,7 @@ echo "  -> job ${jid1}"
 # =============================================================================
 echo "Submitting stage 1b: check fit (depends on ${jid1})"
 jid1b=$(sbatch --parsable \
-    --export="${EXPORT}" \
+    "${sbatch_common[@]}" \
     --dependency=afterok:${jid1} \
     --job-name=dtitk-checkfit \
     --mem=2G \
@@ -114,7 +121,7 @@ echo "  -> job ${jid1b}"
 # =============================================================================
 echo "Submitting stage 2a: prep inter-reg (depends on ${jid1b})"
 jid2a=$(sbatch --parsable \
-    --export="${EXPORT}" \
+    "${sbatch_common[@]}" \
     --dependency=afterok:${jid1b} \
     --job-name=dtitk-prepinterreg \
     --mem=2G \
@@ -131,7 +138,7 @@ echo "  -> job ${jid2a}"
 # =============================================================================
 echo "Submitting stage 2b: inter-reg rigid (depends on ${jid2a})"
 jid2b=$(sbatch --parsable \
-    --export="${EXPORT}" \
+    "${sbatch_common[@]}" \
     --dependency=afterok:${jid2a} \
     --job-name=dtitk-interreg-rigid \
     --mem=4G \
@@ -149,7 +156,7 @@ echo "  -> job ${jid2b}"
 # =============================================================================
 echo "Submitting stage 2c: inter-reg affine (depends on ${jid2b})"
 jid2c=$(sbatch --parsable \
-    --export="${EXPORT}" \
+    "${sbatch_common[@]}" \
     --dependency=afterok:${jid2b} \
     --job-name=dtitk-interreg-affine \
     --mem=4G \
@@ -167,7 +174,7 @@ echo "  -> job ${jid2c}"
 # =============================================================================
 echo "Submitting stage 2c-post: build aff list (depends on ${jid2c})"
 jid2cpost=$(sbatch --parsable \
-    --export="${EXPORT}" \
+    "${sbatch_common[@]}" \
     --dependency=afterok:${jid2c} \
     --job-name=dtitk-afflist \
     --mem=1G \
@@ -187,7 +194,7 @@ echo "  -> job ${jid2cpost}"
 # =============================================================================
 echo "Submitting stage 2d: inter-reg diffeo (depends on ${jid2cpost})"
 jid2d=$(sbatch --parsable \
-    --export="${EXPORT}" \
+    "${sbatch_common[@]}" \
     --dependency=afterok:${jid2cpost} \
     --job-name=dtitk-interreg-diffeo \
     --mem=4G \
@@ -206,7 +213,7 @@ echo "  -> job ${jid2d}"
 # =============================================================================
 echo "Submitting stage 3a: warp to template (array, depends on ${jid2d})"
 jid3a=$(sbatch --parsable \
-    --export="${EXPORT}" \
+    "${sbatch_common[@]}" \
     --dependency=afterok:${jid2d} \
     --array="1-${nsubj}%${simul}" \
     --job-name=dtitk-warp2template \
@@ -220,7 +227,7 @@ echo "  -> job ${jid3a}"
 # =============================================================================
 echo "Submitting stage 3b: warp QC (depends on ${jid3a})"
 jid3b=$(sbatch --parsable \
-    --export="${EXPORT}" \
+    "${sbatch_common[@]}" \
     --dependency=afterok:${jid3a} \
     --job-name=dtitk-warpqc \
     --mem=4G \
@@ -237,7 +244,7 @@ echo "  -> job ${jid3b}"
 # =============================================================================
 echo "Submitting stage 4: make diffusion maps (array, depends on ${jid3b})"
 jid4=$(sbatch --parsable \
-    --export="${EXPORT}" \
+    "${sbatch_common[@]}" \
     --dependency=afterok:${jid3b} \
     --array="1-${nsubj}%${simul}" \
     --job-name=dtitk-diffmaps \
@@ -251,7 +258,7 @@ echo "  -> job ${jid4}"
 # =============================================================================
 echo "Submitting stage 5: TBSS (depends on ${jid4})"
 jid5=$(sbatch --parsable \
-    --export="${EXPORT}" \
+    "${sbatch_common[@]}" \
     --dependency=afterok:${jid4} \
     --job-name=dtitk-tbss \
     --mem=8G \
@@ -270,7 +277,7 @@ echo "  -> job ${jid5}"
 # =============================================================================
 echo "Submitting stage 6: warp atlas (depends on ${jid5})"
 jid6=$(sbatch --parsable \
-    --export="${EXPORT}" \
+    "${sbatch_common[@]}" \
     --dependency=afterok:${jid5} \
     --job-name=dtitk-atlas \
     --output="${workdir}/logs/6-DTITK_atlas_%j.log" \
@@ -283,7 +290,7 @@ echo "  -> job ${jid6}"
 # =============================================================================
 echo "Submitting stage 6-post: build tractfile (depends on ${jid6})"
 jid6post=$(sbatch --parsable \
-    --export="${EXPORT}" \
+    "${sbatch_common[@]}" \
     --dependency=afterok:${jid6} \
     --job-name=dtitk-tractfile \
     --mem=1G \
@@ -303,7 +310,7 @@ echo "  -> job ${jid6post}"
 # =============================================================================
 echo "Submitting stage 7: extract diff values (array, depends on ${jid6post})"
 jid7=$(sbatch --parsable \
-    --export="${EXPORT}" \
+    "${sbatch_common[@]}" \
     --dependency=afterok:${jid6post} \
     --array="1-${nsubj}%${simul}" \
     --job-name=dtitk-extractdiff \
@@ -318,7 +325,7 @@ echo "  -> job ${jid7}"
 # =============================================================================
 echo "Submitting stage 8: write output (depends on ${jid7})"
 jid8=$(sbatch --parsable \
-    --export="${EXPORT}" \
+    "${sbatch_common[@]}" \
     --dependency=afterok:${jid7} \
     --job-name=dtitk-output \
     --mem=4G \
