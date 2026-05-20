@@ -41,6 +41,7 @@ source "${scriptdir}/config.sh"
 # load software
 module load dtitk/${DTITK_VERSION}
 module load fsl/${FSL_VERSION}
+export DTITK_RIGID_FINE=${DTITK_RIGID_FINE:-0}
 . ${DTITK_ROOT}/scripts/dtitk_common.sh
 
 export DTITK_USE_QSUB=0
