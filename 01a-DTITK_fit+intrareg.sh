@@ -5,7 +5,7 @@
 # fixed garbled rm line, scriptdir from env with fallback
 
 #SBATCH --job-name=dtitk-dtifit
-#SBATCH --mem-per-cpu=6G
+#SBATCH --mem=6G
 #SBATCH --partition=luna-cpu-short
 #SBATCH --qos=anw-cpu
 #SBATCH --cpus-per-task=1
@@ -93,7 +93,7 @@ for dwidir in "${preprocdir}/${subj}/dwi" "${preprocdir}/${subj}/ses-"*/dwi; do
         sessionfile=_${session}_
     fi
 
-    if [ -f "${workdir}/${subj}${sessionpath}${subj}${sessionfile}space-dwi_desc-preproc-b${bshell}_dtitk.nii.gz" ]; then
+    if [ -f "${workdir}/${subj}${sessionpath}dwi/${subj}${sessionfile}space-dwi_desc-preproc-b${bshell}_dtitk.nii.gz" ]; then
         echo "DTI-TK preprocessed image already exists for ${subj}${sessionfile} — skipping processing for this timepoint"
         continue
     fi
