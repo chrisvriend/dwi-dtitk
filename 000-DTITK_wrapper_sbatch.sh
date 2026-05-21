@@ -112,7 +112,7 @@ jid1b=$(sbatch --parsable \
     --cpus-per-task=1 \
     --time=00-0:15:00 \
     --output="${workdir}/logs/1b-DTITK_checkfit_%j.log" \
-    --wrap="bash ${scriptdir}/01b-DTITK_checkfit.sh ${workdir}")
+    --wrap="bash ${scriptdir}/01b-DTITK_checkfit.sh ${workdir} ${scriptdir}")
 echo "  -> job ${jid1b}"
 
 # =============================================================================
@@ -129,7 +129,7 @@ jid2a=$(sbatch --parsable \
     --cpus-per-task=1 \
     --time=00-0:15:00 \
     --output="${workdir}/logs/2a-DTITK_prepinterreg_%j.log" \
-    --wrap="bash ${scriptdir}/02a-DTITK_prepinterreg.sh ${workdir}")
+    --wrap="bash ${scriptdir}/02a-DTITK_prepinterreg.sh ${workdir} ${scriptdir}")
 echo "  -> job ${jid2a}"
 
 # =============================================================================

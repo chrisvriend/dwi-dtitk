@@ -65,7 +65,7 @@ threads=${SLURM_CPUS_PER_TASK:-1}
 subj=$(sed "${SLURM_ARRAY_TASK_ID}q;d" "${subjects}")
 if [ -z "${subj}" ]; then
     echo "ERROR: could not resolve subject for SLURM_ARRAY_TASK_ID=${SLURM_ARRAY_TASK_ID}" >&2
-    exit 1
+    exit 126
 fi
 
 QCdir=${workdir}/QC
@@ -83,7 +83,7 @@ for dwidir in "${preprocdir}/${subj}/dwi" "${preprocdir}/${subj}/ses-"*/dwi; do
     [ -d "${dwidir}" ] || continue
 
     sessiondir=$(dirname "${dwidir}")
-    session=$(echo "${sessiondir}" | grep -oP "(?<=${subj}/).*")
+    session=$(echo "${sessiondir}" | grep -oP "(?<=${subj}/).*" || true)
 
     if [ -z "${session}" ]; then
         sessionpath=/
@@ -93,6 +93,7 @@ for dwidir in "${preprocdir}/${subj}/dwi" "${preprocdir}/${subj}/ses-"*/dwi; do
         sessionfile=_${session}_
     fi
 
+    echo "Processing ${subj} (session = ${session:-cross-sectional})"
     mkdir -p "${workdir}/${subj}${sessionpath}"
     rsync -a \
     --exclude "*uncorrected*" \
@@ -196,6 +197,7 @@ for dwidir in "${preprocdir}/${subj}/dwi" "${preprocdir}/${subj}/ses-"*/dwi; do
     # clean up intermediate files
     rm -f \
         "${subj}${sessionfile}space-dwi_desc-preproc-b${bshell}_??.nii.gz" \
+        "${subj}${sessionfile}space-dwi_desc-preproc-b${bshell}_sse.nii.gz" \
         "${subj}${sessionfile}space-dwi_desc-preproc_dwi.nii.gz" \
         "${subj}${sessionfile}space-dwi_desc-preproc_dwi.bvec" \
         "${subj}${sessionfile}space-dwi_desc-preproc_dwi.bval" \

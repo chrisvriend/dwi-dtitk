@@ -109,7 +109,7 @@ for subj in "${subj_dirs[@]}"; do
         [ -d "${dwidir}" ] || continue
 
         sessiondir=$(dirname "${dwidir}")
-        session=$(echo "${sessiondir}" | grep -oP "(?<=${subj}/).*")
+        session=$(echo "${sessiondir}" | grep -oP "(?<=${subj}/).*" || true)
 
         if [ -z "${session}" ]; then
             sessionpath=/

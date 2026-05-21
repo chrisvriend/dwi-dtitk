@@ -23,8 +23,9 @@ EOF
 [ _${1:-} = _ ] && Usage
 
 workdir=${1}
+scriptdir=${2}
 
-scriptdir=${scriptdir:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
+#scriptdir=${scriptdir:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 source "${scriptdir}/config.sh"
 
 if [ ! -d "${workdir}" ]; then
