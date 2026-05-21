@@ -80,6 +80,7 @@ echo "Running iterative affine registration (${Niter} iterations) for ${nsubj} s
 log=dti_affine_population.log
 echo "command: $*" | tee "${log}"
 date | tee -a "${log}"
+mkdir -p "${workdir}/logs"
 
 if [ -f "mean_affine${Niter}.nii.gz" ]; then
     echo "mean_affine${Niter}.nii.gz already exists — skipping affine registration"
@@ -100,7 +101,7 @@ else
     count=1
     while [ ${count} -le ${Niter} ]; do
         echo "Affine iteration ${count}/${Niter}" | tee -a "${log}"
-        let oldcount=count-1
+        oldcount=$((count - 1))
 
         template=mean_affine${oldcount}.nii.gz
 
@@ -109,7 +110,7 @@ else
             --array="1-${nsubj}%${simul}" \
             --job-name=dtitk-aff \
             --output="${workdir}/logs/inter_affine_%A_%a.log" \
-            "${scriptdir}/dti_affine_reg_slurm.sh" ${scriptdir} \
+            "${scriptdir}/dti_affine_reg_slurm.sh" "${scriptdir}" \
                 "${template}" "${subjects}" 0.01 1 1)
         echo "  -> affine iteration ${count} job ${jid} complete" | tee -a "${log}"
 
@@ -132,10 +133,9 @@ else
                -sm "mean_affine${count}.nii.gz" \
                -SMOption "${smoption}" | grep Similarity | tee -a "${log}"
 
-        let count=count+1
+        count=$((count + 1))
     done
 
-    mkdir -p "${workdir}/logs"
     mv inter_affine*.log "${workdir}/logs/" 2>/dev/null || true
 fi
 

@@ -4,7 +4,7 @@
 # input validation, fixed log naming
 
 #SBATCH --job-name=dtitk-rigid
-#SBATCH --mem-per-cpu=2G
+#SBATCH --mem=2G
 #SBATCH --partition=luna-cpu-short
 #SBATCH --qos=anw-cpu
 #SBATCH --cpus-per-task=1
