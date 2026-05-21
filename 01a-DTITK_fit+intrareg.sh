@@ -102,8 +102,9 @@ for dwidir in "${preprocdir}/${subj}/dwi" "${preprocdir}/${subj}/ses-"*/dwi; do
     --exclude "**dns**" \
     --exclude "**cnr-maps**" \
     --exclude "eddyqc" \
+    --exclude "*acqparams*" \
+    --exclude "*index*" \
     "${preprocdir}/${subj}${sessionpath}dwi" "${workdir}/${subj}${sessionpath}"
-    mkdir -p "${workdir}/${subj}${sessionpath}figures"
 
     cd "${workdir}/${subj}${sessionpath}dwi"
 
@@ -127,6 +128,8 @@ for dwidir in "${preprocdir}/${subj}/dwi" "${preprocdir}/${subj}/ses-"*/dwi; do
         fslcpgeom \
             "${subj}${sessionfile}space-dwi_desc-nodif_dwi.nii.gz" \
             "${subj}${sessionfile}space-dwi_desc-brain_mask.nii.gz"
+
+        mkdir -p "${workdir}/${subj}${sessionpath}figures"
 
         slicer \
             "${subj}${sessionfile}space-dwi_desc-nodif_dwi.nii.gz" \
@@ -162,7 +165,10 @@ for dwidir in "${preprocdir}/${subj}/dwi" "${preprocdir}/${subj}/ses-"*/dwi; do
 
         rm -f b0b${bshell}.mif \
               "${subj}${sessionfile}space-dwi_desc-preproc_dwi.mif" \
+              "${subj}${sessionfile}space-dwi_desc-biasest_dwi.mif" \
               "${subj}${sessionfile}space-dwi_desc-preproc-biascor_dwi.mif"
+
+        rm -r  "${workdir}/${subj}${sessionpath}tempbiascorrect"
     fi
 
     # ── dtifit ────────────────────────────────────────────────────────────────
