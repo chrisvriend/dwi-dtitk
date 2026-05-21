@@ -109,7 +109,7 @@ else
             --array="1-${nsubj}%${simul}" \
             --job-name=dtitk-aff \
             --output="${workdir}/logs/inter_affine_%A_%a.log" \
-            "${scriptdir}/dti_affine_reg_slurm.sh" \
+            "${scriptdir}/dti_affine_reg_slurm.sh" ${scriptdir} \
                 "${template}" "${subjects}" 0.01 1 1)
         echo "  -> affine iteration ${count} job ${jid} complete" | tee -a "${log}"
 

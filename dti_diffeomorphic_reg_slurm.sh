@@ -36,14 +36,16 @@ EOF
 [ _${6:-} = _ ] && Usage
 
 template=${1}
-subjects=${2}
-mask=${3}
-initial=${4}
-no_of_iter=${5}
-ftol=${6}
+scriptdir=${2}
+subjects=${3}
+mask=${4}
+initial=${5}
+no_of_iter=${6}
+ftol=${7}
+
 
 # source site config
-scriptdir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+#scriptdir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 source "${scriptdir}/config.sh"
 
 # load software

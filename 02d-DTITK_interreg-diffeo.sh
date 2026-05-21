@@ -105,7 +105,7 @@ else
             --array="1-${nsubj}%${simul}" \
             --job-name=dtitk-diffeo \
             --output="${workdir}/logs/reg_diffeo_%A_%a.log" \
-            "${scriptdir}/dti_diffeomorphic_reg_slurm.sh" \
+            "${scriptdir}/dti_diffeomorphic_reg_slurm.sh" ${scriptdir} \
                 "${template_current}" "${subjects}" "${mask}" 1 ${count} "${ftol}")
         echo "  -> diffeomorphic iteration ${count} job ${jid} complete"
 

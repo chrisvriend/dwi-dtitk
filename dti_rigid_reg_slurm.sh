@@ -35,13 +35,14 @@ EOF
 [ _${3:-} = _ ] && Usage
 
 template=${1}
-subjects=${2}
-ftol=${3}
-useInTrans=${4:-}
-coarse=${5:-0}
+scriptdir=${2}
+subjects=${3}
+ftol=${4}
+useInTrans=${5:-}
+coarse=${6:-0}
 
 # source site config
-scriptdir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+#scriptdir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 source "${scriptdir}/config.sh"
 
 # load software
