@@ -35,8 +35,8 @@ EOF
 
 [ _${6:-} = _ ] && Usage
 
-template=${1}
-scriptdir=${2}
+scriptdir=${1}
+template=${2}
 subjects=${3}
 mask=${4}
 initial=${5}

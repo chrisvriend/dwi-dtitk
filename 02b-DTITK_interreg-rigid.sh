@@ -32,7 +32,7 @@ subjects=${4}
 simul=${5}
 
 # source site config
-scriptdir=${scriptdir:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
+#scriptdir=${scriptdir:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 source "${scriptdir}/config.sh"
 
 # load software
@@ -93,7 +93,7 @@ while [ ${count} -le ${countMax} ]; do
             --array="1-${nsubj}%${simul}" \
             --job-name=dtitk-rigid \
             --output="${workdir}/logs/reg_rigid_%A_%a.log" \
-            "${scriptdir}/dti_rigid_reg_slurm.sh" ${scriptdir}\
+            "${scriptdir}/dti_rigid_reg_slurm.sh" "${scriptdir}" \
                 "${template}" "${subjects}" "${ftol}" "" 1)
         echo "  -> rigid pass ${count} job ${jid} complete"
     else
@@ -104,7 +104,7 @@ while [ ${count} -le ${countMax} ]; do
             --array="1-${nsubj}%${simul}" \
             --job-name=dtitk-rigid \
             --output="${workdir}/logs/reg_rigid_%A_%a.log" \
-            "${scriptdir}/dti_rigid_reg_slurm.sh" ${scriptdir} \
+            "${scriptdir}/dti_rigid_reg_slurm.sh" "${scriptdir}" \
                 "${template}" "${subjects}" "${ftol}" 1 1)
         echo "  -> rigid pass ${count} job ${jid} complete"
     fi
@@ -122,7 +122,7 @@ while [ ${count} -le ${countMax} ]; do
             --array="1-${nsubj}%${simul}" \
             --job-name=dtitk-aff \
             --output="${workdir}/logs/inter_affine_%A_%a.log" \
-            "${scriptdir}/dti_affine_reg_slurm.sh" ${scriptdir} \
+            "${scriptdir}/dti_affine_reg_slurm.sh" "${scriptdir}" \
                 "${template}" "${subjects}" "${ftol}" "" 1)
         echo "  -> affine pass ${count} job ${jid} complete"
     else
@@ -133,7 +133,7 @@ while [ ${count} -le ${countMax} ]; do
             --array="1-${nsubj}%${simul}" \
             --job-name=dtitk-aff \
             --output="${workdir}/logs/inter_affine_%A_%a.log" \
-            "${scriptdir}/dti_affine_reg_slurm.sh" ${scriptdir} \
+            "${scriptdir}/dti_affine_reg_slurm.sh" "${scriptdir}" \
                 "${template}" "${subjects}" "${ftol}" 1 1)
         echo "  -> affine pass ${count} job ${jid} complete"
     fi
