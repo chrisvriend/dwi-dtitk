@@ -228,7 +228,7 @@ echo
 mkdir -p "${workdir}/${subj}/intra"
 cd "${workdir}/${subj}/intra"
 
-ls -1 *desc-preproc-b${bshell}_dtitk.nii.gz > "${subj}.txt"
+ls -1 *desc-preproc-b${bshell}_dtitk.nii.gz > "${subj}.txt" || true
 ntimepoints=$(wc -l < "${subj}.txt")
 
 if [ "${ntimepoints}" -le 1 ]; then
