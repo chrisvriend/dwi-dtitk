@@ -225,6 +225,7 @@ echo
 ###############################################################################
 # Intra-subject registration (longitudinal only — skip if single timepoint)
 ###############################################################################
+mkdir -p "${workdir}/${subj}/intra"
 cd "${workdir}/${subj}/intra"
 
 ls -1 *desc-preproc-b${bshell}_dtitk.nii.gz > "${subj}.txt"
