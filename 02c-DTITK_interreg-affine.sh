@@ -72,6 +72,11 @@ if [ "${nsubj}" -eq 0 ]; then
     exit 1
 fi
 
+# Warn if subjects file already contains _aff entries
+if grep -q '_aff\.nii\.gz' "${subjects}"; then
+    echo "WARNING: subjects file contains _aff entries — check 02a output" >&2
+fi
+
 echo "Running iterative affine registration (${Niter} iterations) for ${nsubj} subjects"
 
 ###############################################################################
@@ -97,6 +102,7 @@ else
         echo "${pref}_aff.nii.gz" >> "${subjects_aff}"
         echo "${pref}.aff"        >> affine.txt
     done < "${subjects}"
+
 
     count=1
     while [ ${count} -le ${Niter} ]; do

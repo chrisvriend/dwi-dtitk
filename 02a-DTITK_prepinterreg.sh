@@ -114,7 +114,7 @@ fi
 ###############################################################################
 # Build combined subject list for inter-subject registration
 ###############################################################################
-ls -1 sub-*.nii.gz > inter_subjects.txt
+ls -1 sub-*.nii.gz | grep -v '_aff\.nii\.gz' > inter_subjects.txt
 
 echo
 if [ -f long_subjects.txt ]; then

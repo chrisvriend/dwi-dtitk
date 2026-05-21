@@ -72,6 +72,13 @@ if [ "${nsubj}" -eq 0 ]; then
     echo "ERROR: subjects file is empty: ${subjects}" >&2
     exit 1
 fi
+
+
+# Warn if subjects file already contains _aff entries
+if grep -q '_aff\.nii\.gz' "${subjects}"; then
+    echo "WARNING: subjects file contains _aff entries — check 02a output" >&2
+fi
+
 echo "Running rigid+affine bootstrap registration for ${nsubj} subjects"
 
 ###############################################################################
