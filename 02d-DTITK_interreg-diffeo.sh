@@ -96,8 +96,9 @@ else
     template_current=mean_diffeomorphic_initial.nii.gz
     count=1
     while [ ${count} -le 6 ]; do
-        echo "Diffeomorphic iteration ${count}/6"
-        let oldcount=count-1
+        echo "Diffeomorphic iteration ${count}/6"  
+        oldcount=$((count - 1))
+
         ln -sf "mean_diffeomorphic_initial${oldcount}.nii.gz" "${template_current}"
 
         jid=$(sbatch --parsable \
@@ -120,7 +121,7 @@ else
             -trans mean_df_inv.nii.gz
 
         rm -f "${template_current}" mean_df.nii.gz mean_df_inv.nii.gz
-        let count=count+1
+        count=$((count + 1))
     done
 
     if [ ! -f mean_diffeomorphic_initial6.nii.gz ]; then
