@@ -94,7 +94,15 @@ for dwidir in "${preprocdir}/${subj}/dwi" "${preprocdir}/${subj}/ses-"*/dwi; do
     fi
 
     mkdir -p "${workdir}/${subj}${sessionpath}"
-    rsync -a "${preprocdir}/${subj}${sessionpath}dwi" "${workdir}/${subj}${sessionpath}"
+    rsync -a \
+    --exclude "*uncorrected*" \
+    --exclude "*5tt*" \
+    --exclude "*meanb0*" \
+    --exclude "**gmwm**" \
+    --exclude "**dns**" \
+    --exclude "**cnr-maps**" \
+    --exclude "eddyqc" \
+    "${preprocdir}/${subj}${sessionpath}dwi" "${workdir}/${subj}${sessionpath}"
     mkdir -p "${workdir}/${subj}${sessionpath}figures"
 
     cd "${workdir}/${subj}${sessionpath}dwi"
