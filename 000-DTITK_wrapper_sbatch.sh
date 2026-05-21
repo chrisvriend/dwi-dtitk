@@ -50,8 +50,7 @@ simul=${4:-7}
 # Resolve scriptdir once on the login node as an absolute path.
 # Exported so every sbatch job receives it as an environment variable
 # and does not need to re-derive it from BASH_SOURCE[0].
-export scriptdir
-scriptdir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+export scriptdir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
 # ── Source site config ────────────────────────────────────────────────────────
 source "${scriptdir}/config.sh"
