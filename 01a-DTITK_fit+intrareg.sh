@@ -93,7 +93,7 @@ for dwidir in "${preprocdir}/${subj}/dwi" "${preprocdir}/${subj}/ses-"*/dwi; do
         sessionfile=_${session}_
     fi
 
-    if [ -f "${subj}${sessionfile}space-dwi_desc-preproc-b${bshell}_dtitk.nii.gz" ]; then
+    if [ -f "${workdir}/${subj}${sessionpath}${subj}${sessionfile}space-dwi_desc-preproc-b${bshell}_dtitk.nii.gz" ]; then
         echo "DTI-TK preprocessed image already exists for ${subj}${sessionfile} — skipping processing for this timepoint"
         continue
     fi
