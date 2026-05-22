@@ -197,11 +197,11 @@ jid2d=$(sbatch --parsable \
     "${sbatch_common[@]}" \
     --dependency=afterok:${jid2cpost} \
     --job-name=dtitk-interreg-diffeo \
-    --mem=4G \
-    --partition="${SLURM_PARTITION}" \
+    --mem=1G \
+    --partition=luna-cpu-long \
     --qos="${SLURM_QOS}" \
     --cpus-per-task=1 \
-    --time=00-8:00:00 \
+    --time=00-16:00:00 \
     --output="${workdir}/logs/2d-DTITK_interreg-diffeo_%j.log" \
     --wrap="bash ${scriptdir}/02d-DTITK_interreg-diffeo.sh \
         ${workdir}/interreg ${scriptdir} \
