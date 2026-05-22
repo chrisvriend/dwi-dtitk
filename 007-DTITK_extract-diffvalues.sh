@@ -4,7 +4,7 @@
 # source config, removed sbatch --wait, input validation, safer loops
 
 #SBATCH --job-name=dtitk-extractdiff
-#SBATCH --mem-per-cpu=2G
+#SBATCH --mem=500M
 #SBATCH --partition=luna-cpu-short
 #SBATCH --qos=anw-cpu
 #SBATCH --cpus-per-task=1

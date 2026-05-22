@@ -4,7 +4,7 @@
 # source config, input validation, safer loops, trap cleanup
 
 #SBATCH --job-name=dtitk-diffmaps
-#SBATCH --mem-per-cpu=4G
+#SBATCH --mem=1G
 #SBATCH --partition=luna-cpu-short
 #SBATCH --qos=anw-cpu
 #SBATCH --cpus-per-task=1

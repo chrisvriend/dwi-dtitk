@@ -176,7 +176,7 @@ jid2cpost=$(sbatch --parsable \
     "${sbatch_common[@]}" \
     --dependency=afterok:${jid2c} \
     --job-name=dtitk-afflist \
-    --mem=1G \
+    --mem=500M \
     --partition="${SLURM_PARTITION}" \
     --qos="${SLURM_QOS}" \
     --cpus-per-task=1 \
@@ -200,7 +200,7 @@ jid2d=$(sbatch --parsable \
     --partition="${SLURM_PARTITION}" \
     --qos="${SLURM_QOS}" \
     --cpus-per-task=1 \
-    --time=00-4:00:00 \
+    --time=00-8:00:00 \
     --output="${workdir}/logs/2d-DTITK_interreg-diffeo_%j.log" \
     --wrap="bash ${scriptdir}/02d-DTITK_interreg-diffeo.sh \
         ${workdir}/interreg ${scriptdir} \
@@ -229,7 +229,7 @@ jid3b=$(sbatch --parsable \
     "${sbatch_common[@]}" \
     --dependency=afterok:${jid3a} \
     --job-name=dtitk-warpqc \
-    --mem=4G \
+    --mem=2G \
     --partition="${SLURM_PARTITION}" \
     --qos="${SLURM_QOS}" \
     --cpus-per-task=1 \
@@ -292,7 +292,7 @@ jid6post=$(sbatch --parsable \
     "${sbatch_common[@]}" \
     --dependency=afterok:${jid6} \
     --job-name=dtitk-tractfile \
-    --mem=1G \
+    --mem=500M \
     --partition="${SLURM_PARTITION}" \
     --qos="${SLURM_QOS}" \
     --cpus-per-task=1 \
@@ -327,7 +327,7 @@ jid8=$(sbatch --parsable \
     "${sbatch_common[@]}" \
     --dependency=afterok:${jid7} \
     --job-name=dtitk-output \
-    --mem=4G \
+    --mem=500M \
     --partition="${SLURM_PARTITION}" \
     --qos="${SLURM_QOS}" \
     --cpus-per-task=1 \
