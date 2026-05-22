@@ -24,10 +24,11 @@ EOF
 
 [ _${1:-} = _ ] && Usage
 
-warpdir=${1}
+scriptdir=${1}
+warpdir=${2}
 
 # source site config
-scriptdir=${scriptdir:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
+#criptdir=${scriptdir:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 source "${scriptdir}/config.sh"
 
 # load software
