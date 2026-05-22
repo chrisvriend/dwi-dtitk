@@ -4,7 +4,7 @@
 # source config, input validation, removed serial subject loop
 
 #SBATCH --job-name=dtitk-warp2template
-#SBATCH --mem-per-cpu=4G
+#SBATCH --mem=2G
 #SBATCH --partition=luna-cpu-short
 #SBATCH --qos=anw-cpu
 #SBATCH --cpus-per-task=1
@@ -31,14 +31,15 @@ EOF
     exit 1
 }
 
-[ _${3:-} = _ ] && Usage
+[ _${4:-} = _ ] && Usage
 
-workdir=${1}
-bshell=${2}
-subjects=${3}
+scriptdir=${1}
+workdir=${2}
+bshell=${3}
+subjects=${4}
 
 # source site config
-scriptdir=${scriptdir:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
+#scriptdir=${scriptdir:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 source "${scriptdir}/config.sh"
 
 # load software

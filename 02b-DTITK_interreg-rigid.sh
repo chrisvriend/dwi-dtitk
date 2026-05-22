@@ -31,6 +31,8 @@ template=${3}
 subjects=${4}
 simul=${5}
 
+simulreg=$(( ${simul} * 2 ))  # more simultaneous tasks for registration stages since they are faster than warping
+
 # source site config
 #scriptdir=${scriptdir:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 source "${scriptdir}/config.sh"
@@ -97,7 +99,7 @@ while [ ${count} -le ${countMax} ]; do
         echo "Rigid registration pass ${count} (ftol=${ftol}, coarse)"
         jid=$(sbatch --parsable \
             --wait \
-            --array="1-${nsubj}%${simul}" \
+            --array="1-${nsubj}%${simulreg}" \
             --job-name=dtitk-rigid \
             --output="${workdir}/logs/reg_rigid_%A_%a.log" \
             "${scriptdir}/dti_rigid_reg_slurm.sh" "${scriptdir}" \

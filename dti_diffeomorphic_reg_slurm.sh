@@ -4,7 +4,7 @@
 # input validation, fixed log naming
 
 #SBATCH --job-name=dtitk-diffeo
-#SBATCH --mem=1G
+#SBATCH --mem=500M
 #SBATCH --partition=luna-cpu-short
 #SBATCH --qos=anw-cpu
 #SBATCH --cpus-per-task=1

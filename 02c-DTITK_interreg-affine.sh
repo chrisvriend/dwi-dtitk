@@ -31,6 +31,8 @@ subjects=${3}
 Niter=${4}
 simul=${5}
 
+simulreg=$(( ${simul} * 2 ))  # more simultaneous tasks for registration stages since they are faster than warping
+
 # source site config
 #scriptdir=${scriptdir:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 source "${scriptdir}/config.sh"
@@ -113,7 +115,7 @@ else
 
         jid=$(sbatch --parsable \
             --wait \
-            --array="1-${nsubj}%${simul}" \
+            --array="1-${nsubj}%${simulreg}" \
             --job-name=dtitk-aff \
             --output="${workdir}/logs/inter_affine_%A_%a.log" \
             "${scriptdir}/dti_affine_reg_slurm.sh" "${scriptdir}" \

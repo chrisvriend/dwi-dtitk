@@ -47,6 +47,7 @@ workdir=${2}
 outputdir=${3}
 simul=${4:-7}
 
+simulreg=$(( ${simul} * 2 ))  # more simultaneous tasks for registration stages since they are faster than warping
 # Resolve scriptdir once on the login node as an absolute path.
 # Exported so every sbatch job receives it as an environment variable
 # and does not need to re-derive it from BASH_SOURCE[0].
@@ -217,7 +218,7 @@ jid3a=$(sbatch --parsable \
     --array="1-${nsubj}%${simul}" \
     --job-name=dtitk-warp2template \
     --output="${workdir}/logs/3a-DTITK_%A_%a.log" \
-    "${scriptdir}/03a-DTITK_warp2template.sh" \
+    "${scriptdir}/03a-DTITK_warp2template.sh" ${scriptdir}\
         "${workdir}" "${bshell}" "${preprocdir}/subjects.txt")
 echo "  -> job ${jid3a}"
 
@@ -229,13 +230,13 @@ jid3b=$(sbatch --parsable \
     "${sbatch_common[@]}" \
     --dependency=afterok:${jid3a} \
     --job-name=dtitk-warpqc \
-    --mem=2G \
+    --mem=500M \
     --partition="${SLURM_PARTITION}" \
     --qos="${SLURM_QOS}" \
     --cpus-per-task=1 \
     --time=00-0:30:00 \
     --output="${workdir}/logs/3b-DTITK_warpqc_%j.log" \
-    --wrap="bash ${scriptdir}/03b-DTITK_warpqc.sh ${workdir}/warps")
+    --wrap="bash ${scriptdir}/03b-DTITK_warpqc.sh ${scriptdir}${workdir}/warps")
 echo "  -> job ${jid3b}"
 
 # =============================================================================

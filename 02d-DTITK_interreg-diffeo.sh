@@ -34,6 +34,7 @@ mask=${4}
 subjects=${5}
 simul=${6}
 
+simulreg=$(( ${simul} * 2 ))  # more simultaneous tasks for registration stages since they are faster than warping
 # source site config
 #scriptdir=${scriptdir:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 source "${scriptdir}/config.sh"
@@ -103,7 +104,7 @@ else
 
         jid=$(sbatch --parsable \
             --wait \
-            --array="1-${nsubj}%${simul}" \
+            --array="1-${nsubj}%${simulreg}" \
             --job-name=dtitk-diffeo \
             --output="${workdir}/logs/reg_diffeo_%A_%a.log" \
             "${scriptdir}/dti_diffeomorphic_reg_slurm.sh" ${scriptdir} \
