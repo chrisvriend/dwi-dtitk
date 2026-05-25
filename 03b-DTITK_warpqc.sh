@@ -22,7 +22,7 @@ EOF
     exit 1
 }
 
-[ _${1:-} = _ ] && Usage
+[ _${2:-} = _ ] && Usage
 
 scriptdir=${1}
 warpdir=${2}
