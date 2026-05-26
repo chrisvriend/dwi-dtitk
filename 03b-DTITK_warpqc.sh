@@ -73,7 +73,7 @@ fi
 mkdir -p "${warpdir}/QC"
 
 # ── Step 3: per-subject QC — submit as a SLURM job array ────────────────────
-# Write the subject list so the array worker can index into it
+# subjs_warped_list.txt contains only filenames (no path); jobs cd into warpdir
 printf '%s\n' "${warped_scans[@]}" > "${warpdir}/subjs_warped_list.txt"
 n_subjs=${#warped_scans[@]}
 
@@ -82,10 +82,11 @@ echo "Submitting SLURM job array (1-${n_subjs}) for per-subject QC overlays"
 sbatch \
     --job-name=dtitk_qc \
     --array=1-${n_subjs}%20 \
-    --time=00:05:00 \
-    --mem=500M \
+    --time=00:30:00 \
+    --mem=4G \
     --cpus-per-task=1 \
     --output="${warpdir}/QC/slurm-%A_%a.out" \
+    --error="${warpdir}/QC/slurm-%A_%a.err" \
     --wrap="
         set -euo pipefail
         source '${scriptdir}/config.sh'
@@ -94,7 +95,6 @@ sbatch \
 
         # pick this task's scan from the list (1-based SLURM_ARRAY_TASK_ID)
         subj_scan=\$(sed -n \"\${SLURM_ARRAY_TASK_ID}p\" '${warpdir}/subjs_warped_list.txt')
-        cd '${warpdir}'
 
         stem=\${subj_scan%_space-template_desc-b\${bshell}*}
         stam=\${subj_scan%.nii.gz}
@@ -110,7 +110,8 @@ sbatch \
         tmpdir=\$(mktemp -d '${warpdir}/tmp_qc_XXXXXX')
         trap 'rm -rf \"\${tmpdir}\"' EXIT
 
-        cp '${warpdir}/\${subj_scan}' \"\${tmpdir}/\"
+        # subj_scan is a filename only — source it from warpdir
+        cp '${warpdir}/'\"\${subj_scan}\" \"\${tmpdir}/\"
         cd \"\${tmpdir}\"
 
         TVEigenSystem -in \"\${subj_scan}\" -type FSL

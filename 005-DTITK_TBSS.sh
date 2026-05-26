@@ -68,7 +68,9 @@ fi
 ###############################################################################
 # Determine diffusion map set from first subject file
 ###############################################################################
-first_scan=$(ls -1 *space-template_desc-diffmaps_res-?mm_dtitk.nii.gz 2>/dev/null | head -1)
+shopt -s nullglob
+files=(*space-template_desc-diffmaps_res-?mm_dtitk.nii.gz)
+first_scan=${files[0]:-}   # empty if no files
 if [ -z "${first_scan}" ]; then
     echo "ERROR: no diffmap files found in ${diffdir}" >&2
     exit 1
