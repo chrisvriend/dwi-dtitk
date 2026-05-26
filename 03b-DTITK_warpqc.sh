@@ -82,11 +82,12 @@ echo "Submitting SLURM job array (1-${n_subjs}) for per-subject QC overlays"
 sbatch \
     --job-name=dtitk_qc \
     --array=1-${n_subjs}%20 \
-    --time=00:30:00 \
-    --mem=4G \
+    --time=00:05:00 \
+    --mem=500M \
+     --partition="${SLURM_PARTITION}" \
+    --qos="${SLURM_QOS}" \
     --cpus-per-task=1 \
     --output="${warpdir}/QC/slurm-%A_%a.out" \
-    --error="${warpdir}/QC/slurm-%A_%a.err" \
     --wrap="
         set -euo pipefail
         source '${scriptdir}/config.sh'
