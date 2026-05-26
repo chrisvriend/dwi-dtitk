@@ -234,7 +234,7 @@ jid3b=$(sbatch --parsable \
     --partition="${SLURM_PARTITION}" \
     --qos="${SLURM_QOS}" \
     --cpus-per-task=1 \
-    --time=00-0:30:00 \
+    --time=00-1:30:00 \
     --output="${workdir}/logs/3b-DTITK_warpqc_%j.log" \
     --wrap="bash ${scriptdir}/03b-DTITK_warpqc.sh ${scriptdir} ${workdir}/warps")
 echo "  -> job ${jid3b}"
