@@ -261,7 +261,7 @@ jid5=$(sbatch --parsable \
     "${sbatch_common[@]}" \
     --dependency=afterok:${jid4} \
     --job-name=dtitk-tbss \
-    --mem=8G \
+    --mem=12G \
     --partition="${SLURM_PARTITION}" \
     --qos="${SLURM_QOS}" \
     --cpus-per-task=1 \
