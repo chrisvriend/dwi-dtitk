@@ -56,7 +56,7 @@ else
 fi
 
 ###############################################################################
-# Generate white matter skeleton
+# Generate white matter skeleton (once, used throughout)
 ###############################################################################
 if [ ! -f mean_FA_skeleton.nii.gz ]; then
     echo "Generating WM skeleton"
@@ -156,13 +156,15 @@ done
 # Set up tbss/stats directory structure
 ###############################################################################
 mkdir -p tbss/stats
-cp mean_FA.nii.gz mean_FA_skeleton_mskd.nii.gz mean_FA_mask.nii.gz tbss/stats/
+cp mean_FA.nii.gz mean_FA_mask.nii.gz tbss/stats/
+# NOTE: mean_FA_skeleton_mskd is renamed to mean_FA_skeleton here —
+# this is the single skeleton used by tbss_4_prestats and tbss_skeleton -p
+mv mean_FA_skeleton_mskd.nii.gz tbss/stats/mean_FA_skeleton.nii.gz
 
 cd tbss/stats
 for diff in "${diffs[@]}"; do
     [ -L "all_${diff}.nii.gz" ] || ln -sf "../../all_${diff}.nii.gz" "all_${diff}.nii.gz"
 done
-mv mean_FA_skeleton_mskd.nii.gz mean_FA_skeleton.nii.gz
 cd ..
 
 ###############################################################################
@@ -193,8 +195,19 @@ done
 
 ###############################################################################
 # Split skeletonised 4D images back to subject-specific volumes
+# and mask each volume with the group skeleton mask to ensure
+# coverage is consistent across subjects before fslstats extraction
 ###############################################################################
 mkdir -p "${diffdir}/tbss/stats/temp"
+
+# derive the group skeleton mask once (thresholded at 0.2, binarised)
+skl_mask="${diffdir}/tbss/stats/mean_FA_skeleton_mask.nii.gz"
+if [ ! -f "${skl_mask}" ]; then
+    echo "Creating group skeleton mask"
+    fslmaths "${diffdir}/tbss/stats/mean_FA_skeleton" \
+        -thr ${thresh} -bin "${skl_mask}"
+fi
+cp ${skl_mask} "${diffdir}/mean_FA_skeleton_mask.nii.gz" 
 
 for diff in "${diffs[@]}"; do
     cd "${diffdir}/tbss/stats/temp"
@@ -217,7 +230,11 @@ for diff in "${diffs[@]}"; do
             echo "ERROR: expected volume ${vol_file} not found after fslsplit" >&2
             exit 1
         fi
-        mv "${vol_file}" "${subjid}_${diff}_skeleton.nii.gz"
+
+        # mask with group skeleton mask so every subject has identical coverage
+        fslmaths "${vol_file}" -mas "${skl_mask}" "${subjid}_${diff}_skeleton.nii.gz"
+        rm -f "${vol_file}"
+
         counter=$((counter + 1))
     done < "${diffdir}/subjects.list"
 

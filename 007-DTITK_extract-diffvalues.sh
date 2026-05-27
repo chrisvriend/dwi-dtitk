@@ -68,8 +68,8 @@ if [ ! -f "${tractfile}" ]; then
     echo "ERROR: tractfile not found: ${tractfile}" >&2
     exit 1
 fi
-if [ ! -f "${diffdir}/mean_FA_skeleton_mskd.nii.gz" ]; then
-    echo "ERROR: mean_FA_skeleton_mskd.nii.gz not found in ${diffdir}" >&2
+if [ ! -f "${diffdir}/mean_FA_skeleton_mask.nii.gz" ]; then
+    echo "ERROR: mean_FA_skeleton_mask.nii.gz not found in ${diffdir}" >&2
     exit 1
 fi
 
@@ -89,7 +89,7 @@ while IFS= read -r tract; do
     if [ ! -f "${tract}_skl.nii.gz" ]; then
         echo "Skeletonising ${tract}"
         fslmaths "${tract}" \
-            -mul "${diffdir}/mean_FA_skeleton_mskd.nii.gz" \
+            -mul "${diffdir}/mean_FA_skeleton_mask.nii.gz" \
             -bin "${tract}_skl"
     fi
 done < "${tractfile}"
@@ -107,7 +107,7 @@ if [ ! -f "${scan}" ]; then
     exit 1
 fi
 
-echo "Extracting median diffusion values for ${subj}"
+echo "Extracting median diffusion values"
 
 while IFS= read -r tract; do
     if [ -z "${tract}" ]; then continue; fi
