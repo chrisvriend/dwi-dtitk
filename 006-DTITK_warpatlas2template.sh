@@ -149,6 +149,7 @@ n_failed=0
 for tract in "${tracts[@]}"; do
 
     output="${tractdir}/JHU-${tract}.nii.gz"
+    output_skl="${tractdir}/JHU-${tract}_skl.nii.gz"
 
     if [ -f "${output}" ]; then
         echo "  ${tract}: already exists — skipping"
@@ -168,12 +169,24 @@ for tract in "${tracts[@]}"; do
     fslmaths "${tractdir}/JHU-ICBM-labels_templatespace.nii.gz" \
         -uthr "${tractID}" -thr "${tractID}" -bin "${output}"
 
+###############################################################################
+# Skeletonise tract masks against mean FA skeleton (shared step — idempotent)
+###############################################################################
+
     if [ ! -f "${output}" ]; then
         echo "  ERROR: failed to create ${output}" >&2
         n_failed=$((n_failed + 1))
     else
         n_ok=$((n_ok + 1))
     fi
+
+    if [ ! -f "${output_skl}" ]; then
+        echo "Skeletonising ${tractID}"
+        fslmaths "${output}" \
+            -mul "${diffdir}/mean_FA_skeleton_mask.nii.gz" \
+            -bin "${output_skl}"
+    fi
+
 done
 
 echo

@@ -74,27 +74,6 @@ if [ ! -f "${diffdir}/mean_FA_skeleton_mask.nii.gz" ]; then
 fi
 
 ###############################################################################
-# Skeletonise tract masks against mean FA skeleton (shared step — idempotent)
-###############################################################################
-cd "${tractdir}"
-
-while IFS= read -r tract; do
-    if [ -z "${tract}" ]; then continue; fi
-
-    if [ ! -f "${tract}.nii.gz" ]; then
-        echo "ERROR: tract mask not found: ${tractdir}/${tract}.nii.gz" >&2
-        exit 1
-    fi
-
-    if [ ! -f "${tract}_skl.nii.gz" ]; then
-        echo "Skeletonising ${tract}"
-        fslmaths "${tract}" \
-            -mul "${diffdir}/mean_FA_skeleton_mask.nii.gz" \
-            -bin "${tract}_skl"
-    fi
-done < "${tractfile}"
-
-###############################################################################
 # Extract median diffusion values per tract for this subject
 ###############################################################################
 cd "${diffdir}"
