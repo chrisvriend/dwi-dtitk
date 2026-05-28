@@ -151,7 +151,7 @@ for tract in "${tracts[@]}"; do
     output="${tractdir}/JHU-${tract}.nii.gz"
     output_skl="${tractdir}/JHU-${tract}_skl.nii.gz"
 
-    if [ -f "${output}" ]; then
+    if [[ -f "${output}" && -f "${output_skl}" ]]; then
         echo "  ${tract}: already exists — skipping"
         n_ok=$((n_ok + 1))
         continue
