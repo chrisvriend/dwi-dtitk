@@ -133,6 +133,8 @@ if [ "${minint}" -lt 0 ]; then
     echo "Inverting JHU atlas (negative values detected)"
     fslmaths "${tractdir}/JHU-ICBM-labels_templatespace.nii.gz" \
         -mul -1 "${tractdir}/JHU-ICBM-labels_templatespace.nii.gz"
+    fslmaths "${tractdir}/JHU-ICBM-labels_templatespace.nii.gz" \
+        -thr 0 "${tractdir}/JHU-ICBM-labels_templatespace.nii.gz"
 fi
 
 ###############################################################################
@@ -168,9 +170,12 @@ for tract in "${tracts[@]}"; do
     echo "  ${tract} == label ${tractID}"
     fslmaths "${tractdir}/JHU-ICBM-labels_templatespace.nii.gz" \
         -uthr "${tractID}" -thr "${tractID}" -bin "${output}"
+    
+    # because of an unknown error with 
+    fslcpgeom "${diffdir}/mean_FA.nii.gz" "${output}"
 
 ###############################################################################
-# Skeletonise tract masks against mean FA skeleton (shared step — idempotent)
+# Skeletonise tract masks against mean FA skeleton (shared step)
 ###############################################################################
 
     if [ ! -f "${output}" ]; then
@@ -181,7 +186,7 @@ for tract in "${tracts[@]}"; do
     fi
 
     if [ ! -f "${output_skl}" ]; then
-        echo "Skeletonising ${tractID}"
+        echo "Skeletonising ${tract}"
         fslmaths "${output}" \
             -mul "${diffdir}/mean_FA_skeleton_mask.nii.gz" \
             -bin "${output_skl}"
