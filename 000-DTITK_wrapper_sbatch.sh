@@ -302,6 +302,7 @@ jid6post=$(sbatch --parsable \
     --wrap="cd ${workdir}/tracts && \
             ls -1 JHU*.nii.gz > tractfile.txt && \
             sed -i '/JHU-ICBM-labels_templatespace.nii.gz/d' tractfile.txt && \
+            sed -i '/_skl/d' tractfile.txt && \
             sed -i 's/.nii.gz//' tractfile.txt")
 echo "  -> job ${jid6post}"
 

@@ -46,6 +46,9 @@ source "${scriptdir}/config.sh"
 # load software
 module load dtitk/${DTITK_VERSION}
 module load fsl/${FSL_VERSION}
+module load Anaconda3/${ANACONDA_VERSION}
+conda activate "${MRTRIX_ENV}"
+
 
 # resolve subject from array task ID
 subj=$(sed "${SLURM_ARRAY_TASK_ID}q;d" "${subjects}")
