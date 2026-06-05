@@ -335,7 +335,7 @@ jid8=$(sbatch --parsable \
     --cpus-per-task=1 \
     --time=00-0:30:00 \
     --output="${workdir}/logs/8-DTITK_output_%j.log" \
-    --wrap="bash ${scriptdir}/008-DTITK_write-output.sh \
+    --wrap="bash ${scriptdir}/008-DTITK_write-output.sh ${scriptdir} \
         ${workdir} ${outputdir} ${bshell}")
 echo "  -> job ${jid8}"
 

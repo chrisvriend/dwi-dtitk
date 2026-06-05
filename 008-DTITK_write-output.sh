@@ -23,12 +23,13 @@ EOF
 
 [ _${3:-} = _ ] && Usage
 
-workdir=${1}
-outputdir=${2}
-bshell=${3}
+scriptdir=${1}
+workdir=${2}
+outputdir=${3}
+bshell=${4}
 
 # source site config
-scriptdir=${scriptdir:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
+#scriptdir=${scriptdir:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 source "${scriptdir}/config.sh"
 
 # validate inputs
