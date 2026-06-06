@@ -313,7 +313,7 @@ echo "Submitting stage 7: extract diff values (array, depends on ${jid6post})"
 jid7=$(sbatch --parsable \
     "${sbatch_common[@]}" \
     --dependency=afterok:${jid6post} \
-    --array="1-${nsubj}%${simul}" \
+    --array="1-${nsubj}%20" \
     --job-name=dtitk-extractdiff \
     --output="${workdir}/logs/7-DTITK_%A_%a.log" \
     "${scriptdir}/007-DTITK_extract-diffvalues.sh" \

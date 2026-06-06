@@ -12,7 +12,8 @@ Usage() {
     Copies final pipeline outputs (diffusion maps, CSVs, transforms,
     QC figures, templates, tracts, logs) to the output directory.
 
-    Usage: bash ./008-DTITK_write-output.sh workdir outputdir bshell
+    Usage: bash ./008-DTITK_write-output.sh scriptdir workdir outputdir bshell
+      scriptdir  full path to scripts directory
       workdir    full path to working (head) directory
       outputdir  full path to final output directory
       bshell     b-value shell (e.g. 1000)
@@ -21,7 +22,7 @@ EOF
     exit 1
 }
 
-[ _${3:-} = _ ] && Usage
+[ _${4:-} = _ ] && Usage
 
 scriptdir=${1}
 workdir=${2}
