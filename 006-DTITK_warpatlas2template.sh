@@ -104,7 +104,6 @@ if [ ! -f "${tractdir}/JHU-ICBM-labels_templatespace.nii.gz" ]; then
     echo "Warping JHU-ICBM label atlas to template space"
     antsApplyTransforms \
         -d 3 \
-        -e 1 \
         -i "${FSLDIR}/data/atlases/JHU/JHU-ICBM-labels-1mm.nii.gz" \
         -r "${diffdir}/mean_FA.nii.gz" \
         -o "${tractdir}/JHU-ICBM-labels_templatespace.nii.gz" \
@@ -123,19 +122,6 @@ else
     echo "JHU-ICBM-labels_templatespace.nii.gz already exists — skipping"
 fi
 
-###############################################################################
-# Fix label polarity if needed (invert negative values)
-###############################################################################
-minR=$(fslstats "${tractdir}/JHU-ICBM-labels_templatespace.nii.gz" -R | awk '{print $1}')
-minint=${minR%.*}
-
-if [ "${minint}" -lt 0 ]; then
-    echo "Inverting JHU atlas (negative values detected)"
-    fslmaths "${tractdir}/JHU-ICBM-labels_templatespace.nii.gz" \
-        -mul -1 "${tractdir}/JHU-ICBM-labels_templatespace.nii.gz"
-    fslmaths "${tractdir}/JHU-ICBM-labels_templatespace.nii.gz" \
-        -thr 0 "${tractdir}/JHU-ICBM-labels_templatespace.nii.gz"
-fi
 
 ###############################################################################
 # Extract individual tract masks
